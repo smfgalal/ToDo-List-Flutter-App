@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/constants.dart';
+import 'package:todo_app/main.dart';
+import 'package:todo_app/models/todo_model.dart';
+import 'package:todo_app/views/edit_todo_view.dart';
 
 class TodoListItem extends StatefulWidget {
-  const TodoListItem({super.key,});
+  const TodoListItem({super.key, required this.todoModel});
 
+  final TodoModel todoModel;
 
   @override
   State<TodoListItem> createState() => _TodoListItemState();
@@ -16,12 +20,10 @@ class _TodoListItemState extends State<TodoListItem> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => EditToDoView(),
-        //   ),
-        // );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => EditToDoView()),
+        );
       },
       child: SizedBox(
         height: 120,
@@ -45,8 +47,10 @@ class _TodoListItemState extends State<TodoListItem> {
                     onChanged: (value) async {
                       if (value != null) {
                         setState(() {
-                          isChecked = value; 
+                          isChecked = value;
                         });
+                        widget.todoModel.isFinished = value;
+                        await todoProvider.saveData(widget.todoModel);
                       }
                     },
                   ),
@@ -56,7 +60,7 @@ class _TodoListItemState extends State<TodoListItem> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Todo Note',
+                        widget.todoModel.note,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -64,7 +68,7 @@ class _TodoListItemState extends State<TodoListItem> {
                         ),
                       ),
                       Text(
-                        '02:45 AM',
+                        widget.todoModel.toDate,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -80,7 +84,7 @@ class _TodoListItemState extends State<TodoListItem> {
               right: 16,
               bottom: 14,
               child: Text(
-                'Creation Date: 25/04/2025 03:32 PM',
+                'Creation Date: ${widget.todoModel.creationDate}',
                 style: const TextStyle(
                   color: Color.fromARGB(255, 180, 162, 244),
                   fontSize: 11,

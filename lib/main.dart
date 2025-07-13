@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/constants.dart';
+import 'package:todo_app/database/todo_provider.dart';
 import 'package:todo_app/views/home_view.dart';
 
+late TodoProvider todoProvider;
+
 void main() {
+  todoProvider = TodoProvider();
   runApp(const ToDoListApp());
 }
 
-class ToDoListApp extends StatelessWidget {
+class ToDoListApp extends StatefulWidget {
   const ToDoListApp({super.key});
+
+  @override
+  State<ToDoListApp> createState() => _ToDoListAppState();
+}
+
+class _ToDoListAppState extends State<ToDoListApp> {
+
 
   @override
   Widget build(BuildContext context) {
@@ -26,5 +37,11 @@ class ToDoListApp extends StatelessWidget {
       ),
       home: const HomeView(),
     );
+  }
+
+  @override
+  void dispose() {
+    todoProvider.dispose();
+    super.dispose();
   }
 }
