@@ -1,13 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_app/constants.dart';
+import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/views/add_new_todo_view.dart';
 import 'package:todo_app/widgets/lists_drop_down_list.dart';
 import 'package:todo_app/widgets/todo_list_item.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  @override
+  void initState() {
+    BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,28 +74,32 @@ class HomeView extends StatelessWidget {
         ],
         toolbarHeight: 75,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: StreamBuilder<List<TodoModel>>(
-          stream: todoProvider.readAllData(),
-          builder: (context, snapshot) {
-            // if (snapshot.connectionState == ConnectionState.waiting) {
-            //   return const Center(child: CircularProgressIndicator());
-            // }
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
-            final notes = snapshot.data ?? [];
-            return notes.isNotEmpty
-                ? ListView.builder(
-                    itemCount: notes.length,
-                    itemBuilder: (context, index) {
-                      return TodoListItem(todoModel: notes[index]);
-                    },
-                  )
-                : const Center(child: Text('There are no data to show!'));
-          },
-        ),
+      body: BlocBuilder<ReadTodoNotesCubit, ReadTodoNotesState>(
+        builder: (context, state) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: StreamBuilder<List<TodoModel>>(
+              stream: todoProvider.readAllData(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+                final notes = snapshot.data ?? [];
+                return notes.isNotEmpty
+                    ? ListView.builder(
+                        itemCount: notes.length,
+                        itemBuilder: (context, index) {
+                          return TodoListItem(todoModel: notes[index]);
+                        },
+                      )
+                    : const Center(child: Text('There are no data to show!'));
+              },
+            ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: kPrimaryLightColor,

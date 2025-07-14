@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/constants.dart';
+import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/widgets/add_new_widgets/add_new_todo_date.dart';
@@ -55,7 +57,7 @@ class _AddNewToDoViewState extends State<AddNewToDoView> {
           note: _noteTextController!.text,
           toDate: DateFormat.yMMMMd().add_jm().format(_selectedToDate!),
           creationDate: DateFormat.yMMMMd().add_jm().format(DateTime.now()),
-          todoListItem: _selectedList ?? 'Default', 
+          todoListItem: _selectedList ?? 'Default',
         );
         if (_noteId == null) {
           await todoProvider.saveData(todo);
@@ -66,13 +68,13 @@ class _AddNewToDoViewState extends State<AddNewToDoView> {
         Navigator.pop(context);
         if (_noteId != null) {
           // ignore: use_build_context_synchronously
-          Navigator.pop(context); 
+          Navigator.pop(context);
         }
       } catch (e) {
         // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving todo: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving todo: $e')));
       }
     }
   }
@@ -121,7 +123,10 @@ class _AddNewToDoViewState extends State<AddNewToDoView> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: save,
+        onPressed: () {
+          save();
+          BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
+        },
         backgroundColor: kPrimaryColor,
         foregroundColor: Colors.white,
         shape: const CircleBorder(),

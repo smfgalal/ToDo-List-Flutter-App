@@ -5,16 +5,16 @@ import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/models/todo_model_constants.dart';
 
 class TodoProvider {
-  static Database? _db;
+  static Database? database;
   final _todoStreamController = StreamController<List<TodoModel>>.broadcast();
 
   Future<Database?> get db async {
-    if (_db == null) {
-      _db = await openDatabasePath();
+    if (database == null) {
+      database = await openDatabasePath();
       refreshTodos();
-      return _db;
+      return database;
     } else {
-      return _db;
+      return database;
     }
   }
 
@@ -51,11 +51,11 @@ class TodoProvider {
   }
 
   Future<void> refreshTodos() async {
-    final todos = await _fetchAllTodos();
+    final todos = await fetchAllTodos();
     _todoStreamController.add(todos);
   }
 
-  Future<List<TodoModel>> _fetchAllTodos() async {
+  Future<List<TodoModel>> fetchAllTodos() async {
     Database? mydb = await db;
     var list = await mydb!.query(
       tableTodo,
