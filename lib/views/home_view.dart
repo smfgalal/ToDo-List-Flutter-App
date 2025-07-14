@@ -13,13 +13,45 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: const Padding(
+        leading: Padding(
           padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: CustomListsDropDownList(
             isHomePage: true,
             initialTextColor: Colors.white,
             prefixIconColor: Colors.white,
             suffixIconColor: Colors.white,
+            listsDropdownItems: [
+              {
+                'value': 'Default',
+                'label': 'Default',
+                'icon': Icons.blur_on_outlined,
+              },
+              {
+                'value': 'Personal',
+                'label': 'Personal',
+                'icon': Icons.blur_on_outlined,
+              },
+              {
+                'value': 'Shopping',
+                'label': 'Shopping',
+                'icon': Icons.blur_on_outlined,
+              },
+              {
+                'value': 'Wishlist',
+                'label': 'Wishlist',
+                'icon': Icons.blur_on_outlined,
+              },
+              {
+                'value': 'Work',
+                'label': 'Work',
+                'icon': Icons.blur_on_outlined,
+              },
+              {
+                'value': 'Finished',
+                'label': 'Finished',
+                'icon': Icons.check_circle,
+              },
+            ],
           ),
         ),
         leadingWidth: MediaQuery.of(context).size.width / 2,
@@ -62,7 +94,7 @@ class HomeView extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) {
-                return AddNewToDoView();
+                return AddNewToDoView(todoModel: null);
               },
             ),
           );

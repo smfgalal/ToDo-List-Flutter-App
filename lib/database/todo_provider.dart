@@ -23,6 +23,7 @@ class TodoProvider {
     String path = join(dbPath, dbName);
     Database todoDb = await openDatabase(
       path,
+      version: kVersion,
       onCreate: (db, version) async {
         await _onCreate(db);
       },

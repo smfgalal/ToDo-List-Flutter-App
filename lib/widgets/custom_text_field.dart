@@ -12,6 +12,7 @@ class CustomTextField extends StatelessWidget {
     this.onTap,
     this.isReadOnly = false,
     this.textController,
+    this.initialvalue,
   });
 
   final String hintText;
@@ -22,6 +23,7 @@ class CustomTextField extends StatelessWidget {
   final int maxLines;
   final bool isReadOnly;
   final TextEditingController? textController;
+  final String? initialvalue;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,7 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       minLines: minLines,
       maxLines: maxLines,
+      initialValue: initialvalue,
       controller: textController,
       keyboardType: TextInputType.multiline,
       readOnly: isReadOnly,

@@ -17,6 +17,12 @@ class _TodoListItemState extends State<TodoListItem> {
   late bool isChecked;
 
   @override
+  void initState() {
+    super.initState();
+    isChecked = widget.todoModel.isFinished ?? false;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
@@ -49,8 +55,16 @@ class _TodoListItemState extends State<TodoListItem> {
                         setState(() {
                           isChecked = value;
                         });
-                        widget.todoModel.isFinished = value;
-                        await todoProvider.saveData(widget.todoModel);
+                        final updatedTodo = TodoModel(
+                          id: widget.todoModel.id,
+                          note: widget.todoModel.note,
+                          toDate: widget.todoModel.toDate,
+                          creationDate: widget.todoModel.creationDate,
+                          todoListItem: widget.todoModel.todoListItem,
+                          todoRepeatItem: widget.todoModel.todoRepeatItem,
+                          isFinished: value,
+                        );
+                        await todoProvider.updateData(updatedTodo);
                       }
                     },
                   ),
@@ -61,10 +75,12 @@ class _TodoListItemState extends State<TodoListItem> {
                     children: [
                       Text(
                         widget.todoModel.note,
+                        maxLines: 1,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Text(
@@ -83,11 +99,30 @@ class _TodoListItemState extends State<TodoListItem> {
             Positioned(
               right: 16,
               bottom: 14,
-              child: Text(
-                'Creation Date: ${widget.todoModel.creationDate}',
-                style: const TextStyle(
-                  color: Color.fromARGB(255, 180, 162, 244),
-                  fontSize: 11,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width / 1.1,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Text(
+                        'Creation Date: ${widget.todoModel.creationDate}',
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 180, 162, 244),
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        'List: ${widget.todoModel.todoListItem}',
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 180, 162, 244),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

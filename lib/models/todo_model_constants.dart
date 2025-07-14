@@ -1,4 +1,4 @@
-const String dbName = 'todo_db.db';
+const String dbName = 'todo_data.db';
 
 const int kVersion = 1;
 

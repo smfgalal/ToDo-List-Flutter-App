@@ -42,6 +42,38 @@ class EditToDoAddToList extends StatelessWidget {
               initialTextColor: kPrimaryColor,
               prefixIconColor: kPrimaryColor,
               suffixIconColor: kPrimaryColor,
+              listsDropdownItems: [
+                {
+                  'value': 'Default',
+                  'label': 'Default',
+                  'icon': Icons.blur_on_outlined,
+                },
+                {
+                  'value': 'Personal',
+                  'label': 'Personal',
+                  'icon': Icons.blur_on_outlined,
+                },
+                {
+                  'value': 'Shopping',
+                  'label': 'Shopping',
+                  'icon': Icons.blur_on_outlined,
+                },
+                {
+                  'value': 'Wishlist',
+                  'label': 'Wishlist',
+                  'icon': Icons.blur_on_outlined,
+                },
+                {
+                  'value': 'Work',
+                  'label': 'Work',
+                  'icon': Icons.blur_on_outlined,
+                },
+                {
+                  'value': 'Finished',
+                  'label': 'Finished',
+                  'icon': Icons.check_circle,
+                },
+              ],
             ),
             IconButton(
               onPressed: () {

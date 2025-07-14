@@ -8,54 +8,60 @@ class CustomListsDropDownList extends StatefulWidget {
     required this.prefixIconColor,
     required this.suffixIconColor,
     required this.isHomePage,
+    required this.listsDropdownItems,
+    this.initialSelection,
+    this.onSelected,
   });
 
   final Color initialTextColor;
   final Color prefixIconColor;
   final Color suffixIconColor;
   final bool isHomePage;
+  final List<Map<String, dynamic>> listsDropdownItems;
+  final String? initialSelection;
+  final ValueChanged<String?>? onSelected;
 
   @override
-  State<CustomListsDropDownList> createState() => _CustomListsDropDownListState();
+  State<CustomListsDropDownList> createState() =>
+      _CustomListsDropDownListState();
 }
 
 class _CustomListsDropDownListState extends State<CustomListsDropDownList> {
+  late String? selectedValue;
+
+  @override
+  void initState() {
+    super.initState();
+    // Set default to "All Lists" if isHomePage, else use initialSelection or first item
+    selectedValue = widget.isHomePage
+        ? 'All Lists'
+        : widget.initialSelection ?? widget.listsDropdownItems.first['value'];
+    // Notify parent with initial selection
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onSelected?.call(selectedValue);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> listsDropdownItems = [
-      //{'value': 'All Lists', 'label': 'All Lists', 'icon': Icons.home},
-      {'value': 'Default', 'label': 'Default', 'icon': Icons.blur_on_outlined},
-      {
-        'value': 'Personal',
-        'label': 'Personal',
-        'icon': Icons.blur_on_outlined,
-      },
-      {
-        'value': 'Shopping',
-        'label': 'Shopping',
-        'icon': Icons.blur_on_outlined,
-      },
-      {
-        'value': 'Wishlist',
-        'label': 'Wishlist',
-        'icon': Icons.blur_on_outlined,
-      },
-      {'value': 'Work', 'label': 'Work', 'icon': Icons.blur_on_outlined},
-      {'value': 'Finished', 'label': 'Finished', 'icon': Icons.check_circle},
-    ];
-    if (widget.isHomePage) {
-      listsDropdownItems.elementAt(0).addAll({
-        'value': 'All Lists',
-        'label': 'All Lists',
-        'icon': Icons.home,
-      });
-    } else {
-      listsDropdownItems.removeLast();
-    }
+    final items = widget.isHomePage
+        ? [
+            {'value': 'All Lists', 'label': 'All Lists', 'icon': Icons.home},
+            ...widget.listsDropdownItems,
+          ]
+        : widget.listsDropdownItems
+              .where((item) => item['value'] != 'Finished')
+              .toList();
 
-    String? selectedItem = listsDropdownItems.first['value'];
     return DropdownMenu(
-      //width: MediaQuery.of(context).size.width / 2.1,
+      onSelected: (value) {
+        if (value != null) {
+          setState(() {
+            selectedValue = value;
+          });
+          widget.onSelected?.call(value);
+        }
+      },
       enableFilter: true,
       leadingIcon: const Icon(Icons.home),
       textStyle: TextStyle(color: widget.initialTextColor, fontSize: 18),
@@ -63,19 +69,20 @@ class _CustomListsDropDownListState extends State<CustomListsDropDownList> {
         prefixIconColor: widget.prefixIconColor,
         suffixIconColor: widget.suffixIconColor,
       ),
-
-      initialSelection: selectedItem,
-      dropdownMenuEntries: listsDropdownItems.map((item) {
+      initialSelection: selectedValue,
+      dropdownMenuEntries: items.map((item) {
         return DropdownMenuEntry<String>(
           value: item['value'],
           label: item['label'],
           leadingIcon: Icon(item['icon'], color: kPrimaryColor),
           style: ButtonStyle(
-            surfaceTintColor: WidgetStateColor.resolveWith((C) {
-              return kPrimaryColor;
-            }),
-            shape: WidgetStateOutlinedBorder.resolveWith((c) {
-              return LinearBorder.bottom(side: BorderSide(color: Colors.white));
+            surfaceTintColor: WidgetStateColor.resolveWith(
+              (_) => kPrimaryColor,
+            ),
+            shape: WidgetStateOutlinedBorder.resolveWith((_) {
+              return LinearBorder.bottom(
+                side: const BorderSide(color: Colors.white),
+              );
             }),
           ),
         );
