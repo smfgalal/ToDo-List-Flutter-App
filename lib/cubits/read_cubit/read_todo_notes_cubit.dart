@@ -11,7 +11,7 @@ class ReadTodoNotesCubit extends Cubit<ReadTodoNotesState> {
   fetchAllNotes() {
     emit(ReadTodoNotesLoading());
     try {
-      todoModel = todoProvider.fetchAllTodos();
+      todoModel = databaseProvider.fetchAllTodos();
       emit(ReadTodoNotesSuccess());
     } catch (e) {
       emit(ReadTodoNotesFailure(errorMessage: e.toString()));

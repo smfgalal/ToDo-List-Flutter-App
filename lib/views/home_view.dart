@@ -4,8 +4,8 @@ import 'package:todo_app/constants.dart';
 import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/todo_model.dart';
-import 'package:todo_app/views/add_new_todo_view.dart';
-import 'package:todo_app/widgets/lists_drop_down_list.dart';
+import 'package:todo_app/views/add_edit_todo_view.dart';
+import 'package:todo_app/widgets/general_widgets/lists_drop_down_list.dart';
 import 'package:todo_app/widgets/todo_list_item.dart';
 
 class HomeView extends StatefulWidget {
@@ -33,38 +33,7 @@ class _HomeViewState extends State<HomeView> {
             initialTextColor: Colors.white,
             prefixIconColor: Colors.white,
             suffixIconColor: Colors.white,
-            listsDropdownItems: [
-              {
-                'value': 'Default',
-                'label': 'Default',
-                'icon': Icons.blur_on_outlined,
-              },
-              {
-                'value': 'Personal',
-                'label': 'Personal',
-                'icon': Icons.blur_on_outlined,
-              },
-              {
-                'value': 'Shopping',
-                'label': 'Shopping',
-                'icon': Icons.blur_on_outlined,
-              },
-              {
-                'value': 'Wishlist',
-                'label': 'Wishlist',
-                'icon': Icons.blur_on_outlined,
-              },
-              {
-                'value': 'Work',
-                'label': 'Work',
-                'icon': Icons.blur_on_outlined,
-              },
-              {
-                'value': 'Finished',
-                'label': 'Finished',
-                'icon': Icons.check_circle,
-              },
-            ],
+            listsDropdownItems: categoriesListsDropdownItems,
           ),
         ),
         leadingWidth: MediaQuery.of(context).size.width / 2,
@@ -79,7 +48,7 @@ class _HomeViewState extends State<HomeView> {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: StreamBuilder<List<TodoModel>>(
-              stream: todoProvider.readAllData(),
+              stream: databaseProvider.readAllData(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -111,7 +80,7 @@ class _HomeViewState extends State<HomeView> {
             context,
             MaterialPageRoute(
               builder: (context) {
-                return AddNewToDoView(todoModel: null);
+                return AddEditToDoView(todoModel: null);
               },
             ),
           );

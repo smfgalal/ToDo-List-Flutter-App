@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/constants.dart';
-import 'package:todo_app/widgets/custom_text_field.dart';
+import 'package:todo_app/widgets/general_widgets/custom_text_field.dart';
 
 class AddNewToDoText extends StatelessWidget {
   const AddNewToDoText({

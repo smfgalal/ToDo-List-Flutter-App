@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_app/constants.dart';
 import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
-import 'package:todo_app/database/todo_provider.dart';
+import 'package:todo_app/database/database_provider.dart';
 import 'package:todo_app/views/home_view.dart';
 
-late TodoProvider todoProvider;
+late DatabaseProvider databaseProvider;
 
 void main() {
-  todoProvider = TodoProvider();
+  databaseProvider = DatabaseProvider();
   runApp(const ToDoListApp());
 }
 

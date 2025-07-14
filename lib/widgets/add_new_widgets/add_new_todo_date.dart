@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/constants.dart';
-import 'package:todo_app/widgets/custom_text_field.dart';
+import 'package:todo_app/widgets/general_widgets/custom_text_field.dart';
 
 class AddNewToDoDate extends StatefulWidget {
   const AddNewToDoDate({
@@ -9,13 +9,15 @@ class AddNewToDoDate extends StatefulWidget {
     required this.title,
     required this.hintText,
     required this.icon,
-    this.onDateTimeChanged, // Callback to pass selected date/time to parent
+    this.onDateTimeChanged,
+    this.controller,
   });
 
   final String title;
   final String hintText;
   final Icon icon;
   final ValueChanged<DateTime>? onDateTimeChanged;
+  final TextEditingController? controller;
 
   @override
   State<AddNewToDoDate> createState() => _AddNewToDoDateState();
@@ -23,13 +25,7 @@ class AddNewToDoDate extends StatefulWidget {
 
 class _AddNewToDoDateState extends State<AddNewToDoDate> {
   DateTime? chosenDate;
-  final _controller = TextEditingController();
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   Future<void> _selectDateTime(BuildContext context) async {
     // Show DatePicker
@@ -61,7 +57,9 @@ class _AddNewToDoDateState extends State<AddNewToDoDate> {
         );
         setState(() {
           chosenDate = dateTime;
-          _controller.text = DateFormat.yMMMMd().add_jm().format(dateTime);
+          widget.controller?.text = DateFormat.yMMMMd().add_jm().format(
+            dateTime,
+          );
         });
         // Notify parent widget
         widget.onDateTimeChanged?.call(dateTime);
@@ -89,7 +87,7 @@ class _AddNewToDoDateState extends State<AddNewToDoDate> {
             SizedBox(
               width: MediaQuery.of(context).size.width / 1.3,
               child: CustomTextField(
-                textController: _controller,
+                textController: widget.controller,
                 hintText: widget.hintText,
                 minLines: 1,
                 maxLines: 5,

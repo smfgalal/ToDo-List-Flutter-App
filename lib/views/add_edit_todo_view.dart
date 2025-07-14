@@ -7,39 +7,53 @@ import 'package:todo_app/main.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/widgets/add_new_widgets/add_new_todo_date.dart';
 import 'package:todo_app/widgets/add_new_widgets/add_new_todo_text.dart';
-import 'package:todo_app/widgets/add_new_widgets/add_new_todo_tolist.dart';
+import 'package:todo_app/widgets/add_new_widgets/add_new_item_tolist.dart';
+import 'package:todo_app/widgets/add_new_widgets/is_task_finished_widget.dart';
 
-class AddNewToDoView extends StatefulWidget {
-  const AddNewToDoView({super.key, this.todoModel});
+class AddEditToDoView extends StatefulWidget {
+  const AddEditToDoView({super.key, this.todoModel});
 
   final TodoModel? todoModel;
 
   @override
-  State<AddNewToDoView> createState() => _AddNewToDoViewState();
+  State<AddEditToDoView> createState() => _AddEditToDoViewState();
 }
 
-class _AddNewToDoViewState extends State<AddNewToDoView> {
+class _AddEditToDoViewState extends State<AddEditToDoView> {
+  bool? isChecked;
   final formKey = GlobalKey<FormState>();
   TextEditingController? _noteTextController;
+  TextEditingController? _toDateTextController;
   DateTime? _selectedToDate;
-  String? _selectedList;
+  String? _selectedCategoriesList;
+  String? _selectedRepeatList;
 
   int? get _noteId => widget.todoModel?.id;
 
   @override
   void initState() {
     _noteTextController = TextEditingController(text: widget.todoModel?.note);
+
+    _toDateTextController = TextEditingController(
+      text: widget.todoModel?.toDate,
+    );
+
     _selectedToDate = widget.todoModel != null
         ? DateFormat.yMMMMd().add_jm().parse(widget.todoModel!.toDate)
         : null;
-    _selectedList =
-        widget.todoModel?.todoListItem ?? 'Default'; // Default to "Default"
+    _selectedCategoriesList =
+        widget.todoModel?.todoListItem ??
+        categoriesListsDropdownItems.first['value'];
+    _selectedRepeatList =
+        widget.todoModel?.todoRepeatItem ?? repeatDropdownItems.first['value'];
+    _noteId != null ? isChecked = widget.todoModel!.isFinished ?? false : false;
     super.initState();
   }
 
   @override
   void dispose() {
     _noteTextController?.dispose();
+    _toDateTextController?.dispose();
     super.dispose();
   }
 
@@ -57,24 +71,22 @@ class _AddNewToDoViewState extends State<AddNewToDoView> {
           note: _noteTextController!.text,
           toDate: DateFormat.yMMMMd().add_jm().format(_selectedToDate!),
           creationDate: DateFormat.yMMMMd().add_jm().format(DateTime.now()),
-          todoListItem: _selectedList ?? 'Default',
+          todoListItem:
+              _selectedCategoriesList ??
+              categoriesListsDropdownItems.first['value'],
+          todoRepeatItem:
+              _selectedRepeatList ?? repeatDropdownItems.first['value'],
         );
         if (_noteId == null) {
-          await todoProvider.saveData(todo);
+          await databaseProvider.saveData(todo);
         } else {
-          await todoProvider.updateData(todo);
+          await databaseProvider.updateData(todo);
         }
         // ignore: use_build_context_synchronously
         Navigator.pop(context);
-        if (_noteId != null) {
-          // ignore: use_build_context_synchronously
-          Navigator.pop(context);
-        }
       } catch (e) {
         // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error saving todo: $e')));
+        ScaffoldMessenger.of(context,).showSnackBar(SnackBar(content: Text('Error saving todo: $e')));
       }
     }
   }
@@ -99,9 +111,16 @@ class _AddNewToDoViewState extends State<AddNewToDoView> {
                 textController: _noteTextController,
               ),
               const SizedBox(height: 64),
+              _noteId != null
+                  ? IsTaskFinishedWidget(
+                      isChecked: isChecked,
+                      todoModel: widget.todoModel!,
+                    )
+                  : const SizedBox(),
               AddNewToDoDate(
                 title: 'Due date',
                 hintText: 'Date not Set',
+                controller: _toDateTextController,
                 icon: const Icon(Icons.calendar_month_rounded),
                 onDateTimeChanged: (dateTime) {
                   setState(() {
@@ -110,12 +129,15 @@ class _AddNewToDoViewState extends State<AddNewToDoView> {
                 },
               ),
               const SizedBox(height: 64),
-              AddNewToDoToList(
-                initialList: _selectedList,
-                onListChanged: (list) {
+              AddNewItemToList(
+                initialCategoriesList: _selectedCategoriesList,
+                onCategoriesListChanged: (list) {
                   setState(() {
-                    _selectedList = list;
+                    _selectedCategoriesList = list;
                   });
+                },
+                onRepeatListChanged: (list) {
+                  _selectedRepeatList = list;
                 },
               ),
             ],

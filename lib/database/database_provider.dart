@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/models/todo_model_constants.dart';
 
-class TodoProvider {
+class DatabaseProvider {
   static Database? database;
   final _todoStreamController = StreamController<List<TodoModel>>.broadcast();
 
