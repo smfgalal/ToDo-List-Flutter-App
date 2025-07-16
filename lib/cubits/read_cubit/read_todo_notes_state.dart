@@ -5,9 +5,11 @@ sealed class ReadTodoNotesState {}
 
 final class ReadTodoNotesInitial extends ReadTodoNotesState {}
 
-final class ReadTodoNotesLoading extends ReadTodoNotesState {}
+final class ReadTodoNotesSuccess extends ReadTodoNotesState {
+  final List<TodoModel> todos; // Add todos list
 
-final class ReadTodoNotesSuccess extends ReadTodoNotesState {}
+  ReadTodoNotesSuccess(this.todos);
+}
 
 final class ReadTodoNotesFailure extends ReadTodoNotesState {
   final String errorMessage;

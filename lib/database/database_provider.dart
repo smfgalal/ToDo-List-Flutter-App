@@ -7,11 +7,10 @@ import 'package:todo_app/models/todo_model_constants.dart';
 class DatabaseProvider {
   static Database? database;
   final _todoStreamController = StreamController<List<TodoModel>>.broadcast();
-
   Future<Database?> get db async {
     if (database == null) {
       database = await openDatabasePath();
-      refreshTodos();
+      await refreshTodos();
       return database;
     } else {
       return database;

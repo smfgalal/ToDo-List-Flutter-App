@@ -1,3 +1,4 @@
+// add_edit_todo_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -20,7 +21,7 @@ class AddEditToDoView extends StatefulWidget {
 }
 
 class _AddEditToDoViewState extends State<AddEditToDoView> {
-  bool? isChecked;
+  late bool isChecked;
   final formKey = GlobalKey<FormState>();
   TextEditingController? _noteTextController;
   TextEditingController? _toDateTextController;
@@ -33,20 +34,13 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
   @override
   void initState() {
     _noteTextController = TextEditingController(text: widget.todoModel?.note);
-
-    _toDateTextController = TextEditingController(
-      text: widget.todoModel?.toDate,
-    );
-
+    _toDateTextController = TextEditingController(text: widget.todoModel?.toDate);
     _selectedToDate = widget.todoModel != null
         ? DateFormat.yMMMMd().add_jm().parse(widget.todoModel!.toDate)
         : null;
-    _selectedCategoriesList =
-        widget.todoModel?.todoListItem ??
-        categoriesListsDropdownItems.first['value'];
-    _selectedRepeatList =
-        widget.todoModel?.todoRepeatItem ?? repeatDropdownItems.first['value'];
-    _noteId != null ? isChecked = widget.todoModel!.isFinished ?? false : false;
+    _selectedCategoriesList = widget.todoModel?.todoListItem ?? categoriesListsDropdownItems.first['value'];
+    _selectedRepeatList = widget.todoModel?.todoRepeatItem ?? repeatDropdownItems.first['value'];
+    isChecked = widget.todoModel?.isFinished ?? false;
     super.initState();
   }
 
@@ -71,22 +65,24 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
           note: _noteTextController!.text,
           toDate: DateFormat.yMMMMd().add_jm().format(_selectedToDate!),
           creationDate: DateFormat.yMMMMd().add_jm().format(DateTime.now()),
-          todoListItem:
-              _selectedCategoriesList ??
-              categoriesListsDropdownItems.first['value'],
-          todoRepeatItem:
-              _selectedRepeatList ?? repeatDropdownItems.first['value'],
+          todoListItem: _selectedCategoriesList ?? categoriesListsDropdownItems.first['value'],
+          todoRepeatItem: _selectedRepeatList ?? repeatDropdownItems.first['value'],
+          isFinished: isChecked,
         );
         if (_noteId == null) {
           await databaseProvider.saveData(todo);
         } else {
           await databaseProvider.updateData(todo);
         }
-        // ignore: use_build_context_synchronously
         Navigator.pop(context);
+        // Ensure context is valid for BlocProvider
+        if (mounted) {
+          BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
+        }
       } catch (e) {
-        // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context,).showSnackBar(SnackBar(content: Text('Error saving todo: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving todo: $e')),
+        );
       }
     }
   }
@@ -103,23 +99,30 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
         child: Form(
           key: formKey,
           child: ListView(
-            children: [
+            children:
+
+            [
               AddNewToDoText(
                 title: 'What is to be done?',
                 hintText: 'Enter Task Here',
                 icon: const Icon(Icons.mic),
                 textController: _noteTextController,
               ),
-              const SizedBox(height: 64),
               _noteId != null
                   ? IsTaskFinishedWidget(
                       isChecked: isChecked,
                       todoModel: widget.todoModel!,
+                      onChanged: (value) {
+                        setState(() {
+                          isChecked = value;
+                        });
+                      },
                     )
                   : const SizedBox(),
+              const SizedBox(height: 64),
               AddNewToDoDate(
                 title: 'Due date',
-                hintText: 'Date not Set',
+                hintText: 'Date not set',
                 controller: _toDateTextController,
                 icon: const Icon(Icons.calendar_month_rounded),
                 onDateTimeChanged: (dateTime) {
@@ -136,8 +139,11 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
                     _selectedCategoriesList = list;
                   });
                 },
+                initialRepeatList: _selectedRepeatList,
                 onRepeatListChanged: (list) {
-                  _selectedRepeatList = list;
+                  setState(() {
+                    _selectedRepeatList = list;
+                  });
                 },
               ),
             ],
@@ -145,10 +151,7 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          save();
-          BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
-        },
+        onPressed: save,
         backgroundColor: kPrimaryColor,
         foregroundColor: Colors.white,
         shape: const CircleBorder(),

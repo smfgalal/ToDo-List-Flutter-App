@@ -6,6 +6,7 @@ import 'package:todo_app/main.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/views/add_edit_todo_view.dart';
 import 'package:todo_app/widgets/general_widgets/confirmation_dialog_message.dart';
+import 'package:todo_app/widgets/general_widgets/custom_check_box.dart';
 
 class TodoListItem extends StatefulWidget {
   const TodoListItem({super.key, required this.todoModel});
@@ -21,8 +22,8 @@ class _TodoListItemState extends State<TodoListItem> {
 
   @override
   void initState() {
-    super.initState();
     isChecked = widget.todoModel.isFinished ?? false;
+    super.initState();
   }
 
   @override
@@ -105,7 +106,8 @@ class _TodoListItemState extends State<TodoListItem> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddEditToDoView(todoModel: widget.todoModel),
+              builder: (context) =>
+                  AddEditToDoView(todoModel: widget.todoModel),
             ),
           );
         },
@@ -119,15 +121,9 @@ class _TodoListItemState extends State<TodoListItem> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     const SizedBox(width: 8),
-                    Checkbox(
-                      splashRadius: 100,
-                      activeColor: kPrimaryLightColor,
-                      side: const BorderSide(
-                        color: Colors.white,
-                        width: 2,
-                        strokeAlign: 2,
-                      ),
+                    CustomCheckBox(
                       value: isChecked,
+                      borderColor: Colors.white,
                       onChanged: (value) async {
                         if (value != null) {
                           setState(() {
@@ -143,6 +139,11 @@ class _TodoListItemState extends State<TodoListItem> {
                             isFinished: value,
                           );
                           await databaseProvider.updateData(updatedTodo);
+                          if (context.mounted) {
+                            BlocProvider.of<ReadTodoNotesCubit>(
+                              context,
+                            ).fetchAllNotes();
+                          }
                         }
                       },
                     ),

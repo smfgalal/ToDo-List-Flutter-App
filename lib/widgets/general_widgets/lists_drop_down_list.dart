@@ -31,7 +31,6 @@ class _CustomListsDropDownListState extends State<CustomListsDropDownList> {
 
   @override
   void initState() {
-    super.initState();
     // Set default to "All Lists" if isHomePage, else use initialSelection or first item
     selectedValue = widget.isHomePage
         ? 'All Lists'
@@ -40,6 +39,7 @@ class _CustomListsDropDownListState extends State<CustomListsDropDownList> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onSelected?.call(selectedValue);
     });
+    super.initState();
   }
 
   @override

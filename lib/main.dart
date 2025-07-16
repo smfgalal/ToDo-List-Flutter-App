@@ -37,9 +37,4 @@ class ToDoListApp extends StatelessWidget {
     );
   }
 
-  // @override
-  // void dispose() {
-  //   todoProvider.dispose();
-  //   super.dispose();
-  // }
 }

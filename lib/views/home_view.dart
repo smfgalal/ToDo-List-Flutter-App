@@ -24,28 +24,43 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: CustomListsDropDownList(
-            isHomePage: true,
-            initialTextColor: Colors.white,
-            prefixIconColor: Colors.white,
-            suffixIconColor: Colors.white,
-            listsDropdownItems: categoriesListsDropdownItems,
+    return BlocBuilder<ReadTodoNotesCubit, ReadTodoNotesState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            leading: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: CustomListsDropDownList(
+                isHomePage: true,
+                initialTextColor: Colors.white,
+                prefixIconColor: Colors.white,
+                suffixIconColor: Colors.white,
+                listsDropdownItems: categoriesListsDropdownItems,
+              ),
+            ),
+            leadingWidth: MediaQuery.of(context).size.width / 2,
+            actions: [
+              IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+              IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+            ],
+            toolbarHeight: 75,
           ),
-        ),
-        leadingWidth: MediaQuery.of(context).size.width / 2,
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
-        ],
-        toolbarHeight: 75,
-      ),
-      body: BlocBuilder<ReadTodoNotesCubit, ReadTodoNotesState>(
-        builder: (context, state) {
-          return Padding(
+          // body: Padding(
+          //   padding: const EdgeInsets.symmetric(vertical: 8),
+          //   child: state is ReadTodoNotesSuccess
+          //       ? state.todos.isNotEmpty
+          //             ? ListView.builder(
+          //                 itemCount: state.todos.length,
+          //                 itemBuilder: (context, index) {
+          //                   return TodoListItem(todoModel: state.todos[index]);
+          //                 },
+          //               )
+          //             : const Center(child: Text('There are no data to show!'))
+          //       : state is ReadTodoNotesFailure
+          //       ? Center(child: Text('Error: ${state.errorMessage}'))
+          //       : const Center(child: CircularProgressIndicator()),
+          // ),
+          body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: StreamBuilder<List<TodoModel>>(
               stream: databaseProvider.readAllData(),
@@ -61,31 +76,33 @@ class _HomeViewState extends State<HomeView> {
                     ? ListView.builder(
                         itemCount: notes.length,
                         itemBuilder: (context, index) {
-                          return TodoListItem(todoModel: notes[index]);
+                          return TodoListItem(
+                            todoModel: notes[index],
+                          );
                         },
                       )
                     : const Center(child: Text('There are no data to show!'));
               },
             ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: kPrimaryLightColor,
-        foregroundColor: Colors.white,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add_task_outlined),
-        onPressed: () {
-          Navigator.push<void>(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return AddEditToDoView(todoModel: null);
-              },
-            ),
-          );
-        },
-      ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: kPrimaryLightColor,
+            foregroundColor: Colors.white,
+            shape: const CircleBorder(),
+            child: const Icon(Icons.add_task_outlined),
+            onPressed: () {
+              Navigator.push<void>(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return AddEditToDoView();
+                  },
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

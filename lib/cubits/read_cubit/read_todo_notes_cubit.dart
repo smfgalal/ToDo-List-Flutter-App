@@ -7,12 +7,10 @@ part 'read_todo_notes_state.dart';
 
 class ReadTodoNotesCubit extends Cubit<ReadTodoNotesState> {
   ReadTodoNotesCubit() : super(ReadTodoNotesInitial());
-  Future<List<TodoModel>>? todoModel;
-  fetchAllNotes() {
-    emit(ReadTodoNotesLoading());
+  fetchAllNotes() async {
     try {
-      todoModel = databaseProvider.fetchAllTodos();
-      emit(ReadTodoNotesSuccess());
+      final todos = await databaseProvider.fetchAllTodos();
+      emit(ReadTodoNotesSuccess(todos));
     } catch (e) {
       emit(ReadTodoNotesFailure(errorMessage: e.toString()));
     }
