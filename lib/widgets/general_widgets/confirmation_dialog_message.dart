@@ -28,9 +28,9 @@ class ConfirmationMessageShowDialog extends StatelessWidget {
                 message,
                 maxLines: 2,
                 softWrap: true,
-                style: TextStyle(color: Colors.white, fontSize: 16),
+                style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -40,16 +40,16 @@ class ConfirmationMessageShowDialog extends StatelessWidget {
                       foregroundColor: kPrimaryColor,
                     ),
                     onPressed: onPressedYes,
-                    child: Text('Yes'),
+                    child: const Text('Yes'),
                   ),
-                  SizedBox(width: 35),
+                  const SizedBox(width: 35),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: kPrimaryLightColor,
                       foregroundColor: kPrimaryColor,
                     ),
                     onPressed: onPressedNo,
-                    child: Text('No'),
+                    child: const Text('No'),
                   ),
                 ],
               ),

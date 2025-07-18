@@ -74,13 +74,13 @@ class _AddNewToDoDateState extends State<AddNewToDoDate> {
       children: [
         Text(
           widget.title,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.w600,
             color: kPrimaryColor,
             fontSize: 18,
           ),
         ),
-        const SizedBox(height: 8),
+         const SizedBox(height: 8),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/constants.dart';
 
-class CustomListsDropDownList extends StatefulWidget {
-  const CustomListsDropDownList({
+class CustomCategoriesListDropDownList extends StatefulWidget {
+  const CustomCategoriesListDropDownList({
     super.key,
     required this.initialTextColor,
     required this.prefixIconColor,
     required this.suffixIconColor,
-    required this.isHomePage,
     required this.listsDropdownItems,
     this.initialSelection,
     this.onSelected,
@@ -16,25 +15,21 @@ class CustomListsDropDownList extends StatefulWidget {
   final Color initialTextColor;
   final Color prefixIconColor;
   final Color suffixIconColor;
-  final bool isHomePage;
   final List<Map<String, dynamic>> listsDropdownItems;
   final String? initialSelection;
   final ValueChanged<String?>? onSelected;
 
   @override
-  State<CustomListsDropDownList> createState() =>
-      _CustomListsDropDownListState();
+  State<CustomCategoriesListDropDownList> createState() =>
+      _CustomCategoriesListDropDownListState();
 }
 
-class _CustomListsDropDownListState extends State<CustomListsDropDownList> {
+class _CustomCategoriesListDropDownListState extends State<CustomCategoriesListDropDownList> {
   late String? selectedValue;
 
   @override
   void initState() {
-    // Set default to "All Lists" if isHomePage, else use initialSelection or first item
-    selectedValue = widget.isHomePage
-        ? 'All Lists'
-        : widget.initialSelection ?? widget.listsDropdownItems.first['value'];
+    selectedValue = widget.initialSelection ?? widget.listsDropdownItems.first['value'];
     // Notify parent with initial selection
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onSelected?.call(selectedValue);
@@ -44,14 +39,7 @@ class _CustomListsDropDownListState extends State<CustomListsDropDownList> {
 
   @override
   Widget build(BuildContext context) {
-    final items = widget.isHomePage
-        ? [
-            {'value': 'All Lists', 'label': 'All Lists', 'icon': Icons.home},
-            ...widget.listsDropdownItems,
-          ]
-        : widget.listsDropdownItems
-              .where((item) => item['value'] != 'Finished')
-              .toList();
+    final items = widget.listsDropdownItems;
 
     return DropdownMenu(
       onSelected: (value) {

@@ -80,7 +80,7 @@ class _CustomDropDownListState extends State<CustomRepeatDropDownList> {
               (_) => kPrimaryColor,
             ),
             shape: WidgetStateOutlinedBorder.resolveWith((_) {
-              return LinearBorder.bottom(side: BorderSide(color: Colors.white));
+              return LinearBorder.bottom(side: const BorderSide(color: Colors.white));
             }),
           ),
         );

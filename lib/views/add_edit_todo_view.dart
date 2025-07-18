@@ -1,20 +1,28 @@
-// add_edit_todo_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/constants.dart';
 import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
 import 'package:todo_app/main.dart';
+import 'package:todo_app/models/categories_list_model.dart';
+import 'package:todo_app/models/repeat_list_model.dart';
 import 'package:todo_app/models/todo_model.dart';
+import 'package:todo_app/widgets/add_new_widgets/add_new_item_tolist.dart';
 import 'package:todo_app/widgets/add_new_widgets/add_new_todo_date.dart';
 import 'package:todo_app/widgets/add_new_widgets/add_new_todo_text.dart';
-import 'package:todo_app/widgets/add_new_widgets/add_new_item_tolist.dart';
 import 'package:todo_app/widgets/add_new_widgets/is_task_finished_widget.dart';
 
 class AddEditToDoView extends StatefulWidget {
-  const AddEditToDoView({super.key, this.todoModel});
+  const AddEditToDoView({
+    super.key,
+    this.todoModel,
+    this.catModel,
+    this.repeatModel,
+  });
 
   final TodoModel? todoModel;
+  final CategoriesListsModel? catModel;
+  final RepeatListsModel? repeatModel;
 
   @override
   State<AddEditToDoView> createState() => _AddEditToDoViewState();
@@ -33,13 +41,17 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
 
   @override
   void initState() {
+    databaseProvider.refreshCategoriesList();
+    databaseProvider.refreshRepeatList();
     _noteTextController = TextEditingController(text: widget.todoModel?.note);
-    _toDateTextController = TextEditingController(text: widget.todoModel?.toDate);
+    _toDateTextController = TextEditingController(
+      text: widget.todoModel?.toDate,
+    );
     _selectedToDate = widget.todoModel != null
         ? DateFormat.yMMMMd().add_jm().parse(widget.todoModel!.toDate)
         : null;
-    _selectedCategoriesList = widget.todoModel?.todoListItem ?? categoriesListsDropdownItems.first['value'];
-    _selectedRepeatList = widget.todoModel?.todoRepeatItem ?? repeatDropdownItems.first['value'];
+    _selectedCategoriesList = widget.todoModel?.todoListItem;
+    _selectedRepeatList = widget.todoModel?.todoRepeatItem;
     isChecked = widget.todoModel?.isFinished ?? false;
     super.initState();
   }
@@ -65,8 +77,8 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
           note: _noteTextController!.text,
           toDate: DateFormat.yMMMMd().add_jm().format(_selectedToDate!),
           creationDate: DateFormat.yMMMMd().add_jm().format(DateTime.now()),
-          todoListItem: _selectedCategoriesList ?? categoriesListsDropdownItems.first['value'],
-          todoRepeatItem: _selectedRepeatList ?? repeatDropdownItems.first['value'],
+          todoListItem: _selectedCategoriesList ?? 'Default',
+          todoRepeatItem: _selectedRepeatList ?? 'No repeat',
           isFinished: isChecked,
         );
         if (_noteId == null) {
@@ -74,15 +86,14 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
         } else {
           await databaseProvider.updateData(todo);
         }
-        Navigator.pop(context);
-        // Ensure context is valid for BlocProvider
         if (mounted) {
+          Navigator.pop(context);
           BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving todo: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving todo: $e')));
       }
     }
   }
@@ -99,9 +110,7 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
         child: Form(
           key: formKey,
           child: ListView(
-            children:
-
-            [
+            children: [
               AddNewToDoText(
                 title: 'What is to be done?',
                 hintText: 'Enter Task Here',
@@ -151,11 +160,13 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: save,
+        onPressed: () {
+          save();
+        },
         backgroundColor: kPrimaryColor,
         foregroundColor: Colors.white,
         shape: const CircleBorder(),
-        child: Icon(Icons.check, size: 30, color: kPrimaryLightColor),
+        child: const Icon(Icons.check, size: 30, color: kPrimaryLightColor),
       ),
     );
   }

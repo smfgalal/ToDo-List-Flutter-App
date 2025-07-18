@@ -58,7 +58,7 @@ class _IsTaskFinishedWidgetState extends State<IsTaskFinishedWidget> {
             }
           },
         ),
-        Text(
+        const Text(
           'Task finished?',
           style: TextStyle(color: kPrimaryColor, fontSize: 16),
         ),

@@ -3,9 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_app/constants.dart';
 import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
 import 'package:todo_app/main.dart';
+import 'package:todo_app/models/categories_list_model.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/views/add_edit_todo_view.dart';
-import 'package:todo_app/widgets/general_widgets/lists_drop_down_list.dart';
+import 'package:todo_app/widgets/general_widgets/categories_list_drop_down_list.dart';
 import 'package:todo_app/widgets/todo_list_item.dart';
 
 class HomeView extends StatefulWidget {
@@ -16,8 +17,11 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  String? selectedCategory;
+
   @override
   void initState() {
+   //databaseProvider.debugDatabaseContents();
     BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
     super.initState();
   }
@@ -29,13 +33,47 @@ class _HomeViewState extends State<HomeView> {
         return Scaffold(
           appBar: AppBar(
             leading: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: CustomListsDropDownList(
-                isHomePage: true,
-                initialTextColor: Colors.white,
-                prefixIconColor: Colors.white,
-                suffixIconColor: Colors.white,
-                listsDropdownItems: categoriesListsDropdownItems,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: StreamBuilder<List<CategoriesListsModel>>(
+                stream: databaseProvider.readCategoriesListsData(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  }
+                  final categories = snapshot.data ?? [];
+                  final dropdownItems = [
+                    {
+                      'value': 'All Lists',
+                      'label': 'All Lists',
+                      'icon': Icons.home,
+                    },
+                    ...categories.map((category) {
+                      return {
+                        'value': category.categoryListValue,
+                        'label': category.categoryListValue,
+                        'icon': Icons.blur_on_outlined,
+                      };
+                    }),
+                  ];
+                  dropdownItems.add({
+                      'value': 'Finished',
+                      'label': 'Finished',
+                      'icon': Icons.done,
+                    },);
+                  selectedCategory = dropdownItems.first['value'].toString();
+                  return CustomCategoriesListDropDownList(
+                    initialTextColor: Colors.white,
+                    prefixIconColor: Colors.white,
+                    suffixIconColor: Colors.white,
+                    listsDropdownItems: dropdownItems,
+                    initialSelection: dropdownItems.first['value'].toString(),
+                    onSelected: (value) {
+                      setState(() {
+                        selectedCategory = value;
+                      });
+                    },
+                  );
+                },
               ),
             ),
             leadingWidth: MediaQuery.of(context).size.width / 2,
@@ -45,40 +83,27 @@ class _HomeViewState extends State<HomeView> {
             ],
             toolbarHeight: 75,
           ),
-          // body: Padding(
-          //   padding: const EdgeInsets.symmetric(vertical: 8),
-          //   child: state is ReadTodoNotesSuccess
-          //       ? state.todos.isNotEmpty
-          //             ? ListView.builder(
-          //                 itemCount: state.todos.length,
-          //                 itemBuilder: (context, index) {
-          //                   return TodoListItem(todoModel: state.todos[index]);
-          //                 },
-          //               )
-          //             : const Center(child: Text('There are no data to show!'))
-          //       : state is ReadTodoNotesFailure
-          //       ? Center(child: Text('Error: ${state.errorMessage}'))
-          //       : const Center(child: CircularProgressIndicator()),
-          // ),
           body: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: StreamBuilder<List<TodoModel>>(
               stream: databaseProvider.readAllData(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
                 final notes = snapshot.data ?? [];
-                return notes.isNotEmpty
+                final filteredNotes = selectedCategory == 'All Lists'
+                    ? notes
+                    : notes
+                          .where(
+                            (note) => note.todoListItem == selectedCategory,
+                          )
+                          .toList();
+                return filteredNotes.isNotEmpty
                     ? ListView.builder(
-                        itemCount: notes.length,
+                        itemCount: filteredNotes.length,
                         itemBuilder: (context, index) {
-                          return TodoListItem(
-                            todoModel: notes[index],
-                          );
+                          return TodoListItem(todoModel: filteredNotes[index]);
                         },
                       )
                     : const Center(child: Text('There are no data to show!'));
@@ -95,7 +120,7 @@ class _HomeViewState extends State<HomeView> {
                 context,
                 MaterialPageRoute(
                   builder: (context) {
-                    return AddEditToDoView();
+                    return const AddEditToDoView();
                   },
                 ),
               );

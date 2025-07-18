@@ -27,7 +27,7 @@ class ToDoListApp extends StatelessWidget {
           primaryColorLight: kPrimaryLightColor,
           primaryColorDark: kPrimaryDarkColor,
           fontFamily: 'Poppins',
-          appBarTheme: AppBarTheme(
+          appBarTheme: const AppBarTheme(
             backgroundColor: kPrimaryColor,
             foregroundColor: Colors.white,
           ),

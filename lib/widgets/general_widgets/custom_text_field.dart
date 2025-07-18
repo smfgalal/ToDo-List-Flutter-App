@@ -39,13 +39,13 @@ class CustomTextField extends StatelessWidget {
       readOnly: isReadOnly,
       decoration: InputDecoration(
         hintText: hintText,
-        border: UnderlineInputBorder(
+        border: const UnderlineInputBorder(
           borderSide: BorderSide(color: kPrimaryColor),
         ),
-        enabledBorder: UnderlineInputBorder(
+        enabledBorder: const UnderlineInputBorder(
           borderSide: BorderSide(color: kPrimaryColor),
         ),
-        focusedBorder: UnderlineInputBorder(
+        focusedBorder: const UnderlineInputBorder(
           borderSide: BorderSide(color: kPrimaryLightColor),
         ),
       ),

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/constants.dart';
+import 'package:todo_app/main.dart';
+import 'package:todo_app/models/categories_list_model.dart';
+import 'package:todo_app/models/repeat_list_model.dart';
+import 'package:todo_app/widgets/general_widgets/categories_list_drop_down_list.dart';
 import 'package:todo_app/widgets/general_widgets/custom_text_field.dart';
-import 'package:todo_app/widgets/general_widgets/lists_drop_down_list.dart';
 import 'package:todo_app/widgets/general_widgets/repeat_drop_down_list.dart';
 
 class AddNewItemToList extends StatefulWidget {
@@ -24,19 +27,7 @@ class AddNewItemToList extends StatefulWidget {
 
 class _AddNewAddToListState extends State<AddNewItemToList> {
   final _newListController = TextEditingController();
-
-  @override
-  void initState() {
-    if (widget.initialCategoriesList == null) {
-      widget.onCategoriesListChanged?.call(
-        categoriesListsDropdownItems.first['value'],
-      );
-    }
-    if (widget.initialRepeatList == null) {
-      widget.onRepeatListChanged?.call(repeatDropdownItems.first['value']);
-    }
-    super.initState();
-  }
+  GlobalKey<FormState> formKey = GlobalKey();
 
   @override
   void dispose() {
@@ -51,45 +42,88 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
       context: context,
       builder: (context) {
         return Dialog(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 64),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 1.8,
-                  child: CustomTextField(
-                    textController: _newListController,
-                    hintText: 'New list name',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'List name is required';
-                      }
-                      if (categoriesListsDropdownItems.any(
-                        (item) => item['value'] == value,
-                      )) {
-                        return 'List name already exists';
-                      }
-                      return null;
-                    },
+          child: Form(
+            key: formKey,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width / 1.8,
+                    child: StreamBuilder<List<CategoriesListsModel>>(
+                      stream: databaseProvider.readCategoriesListsData(),
+                      builder: (context, snapshot) {
+                        final categories = snapshot.data ?? [];
+                        return CustomTextField(
+                          textController: _newListController,
+                          hintText: 'New list name',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'List name is required';
+                            }
+                            if (categories.any(
+                              (item) => item.categoryListValue == value,
+                            )) {
+                              return 'List name already exists';
+                            }
+                            return null;
+                          },
+                        );
+                      },
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  decoration: const BoxDecoration(
-                    color: kPrimaryColor,
-                    shape: BoxShape.circle,
+                  const SizedBox(height: 32),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: const BoxDecoration(
+                            color: kPrimaryLightColor,
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(color: kPrimaryColor),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      GestureDetector(
+                        onTap: () {
+                          if (formKey.currentState!.validate()) {
+                            if (_newListController.text.isNotEmpty) {
+                              Navigator.pop(context, _newListController.text);
+                            }
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 8,
+                          ),
+                          decoration: const BoxDecoration(
+                            color: kPrimaryColor,
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          ),
+                          child: const Text(
+                            'Add List',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  child: IconButton(
-                    color: Colors.white,
-                    onPressed: () {
-                      if (_newListController.text.isNotEmpty) {
-                        Navigator.pop(context, _newListController.text);
-                      }
-                    },
-                    icon: const Icon(Icons.check),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -97,13 +131,9 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
     );
 
     if (result != null && context.mounted) {
-      setState(() {
-        categoriesListsDropdownItems.add({
-          'value': result,
-          'label': result,
-          'icon': Icons.blur_on_outlined,
-        });
-      });
+      await databaseProvider.saveCategoriesListData(
+        CategoriesListsModel(categoryListValue: result),
+      );
       widget.onCategoriesListChanged?.call(result);
     }
   }
@@ -121,14 +151,62 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
             fontSize: 18,
           ),
         ),
-        CustomRepeatDropDownList(
-          initialTextColor: kPrimaryColor,
-          prefixIconColor: kPrimaryColor,
-          suffixIconColor: kPrimaryColor,
-          listsDropdownItems: repeatDropdownItems,
-          initialSelection:
-              widget.initialRepeatList ?? repeatDropdownItems.first['value'],
-          onSelected: widget.onRepeatListChanged,
+        StreamBuilder<List<RepeatListsModel>>(
+          stream: databaseProvider.readRepeatListsData(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+            final repeatLists = snapshot.data ?? [];
+            final dropdownItems = repeatLists
+                .map(
+                  (repeat) => {
+                    'value': repeat.repeatListValue,
+                    'label': repeat.repeatListValue,
+                    'icon': Icons.loop_outlined,
+                  },
+                )
+                .toList();
+
+            final bool isValidRepeat = dropdownItems.any(
+              (item) => item['value'] == widget.initialRepeatList,
+            );
+            if (!isValidRepeat && widget.initialRepeatList != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Repeat option "${widget.initialRepeatList}" no longer exists. Reverted to default.',
+                    ),
+                  ),
+                );
+              });
+            }
+            return CustomRepeatDropDownList(
+              initialTextColor: kPrimaryColor,
+              prefixIconColor: kPrimaryColor,
+              suffixIconColor: kPrimaryColor,
+              listsDropdownItems: dropdownItems.isNotEmpty
+                  ? dropdownItems
+                  : [
+                      {
+                        'value': 'No repeat',
+                        'label': 'No repeat',
+                        'icon': Icons.loop_outlined,
+                      },
+                    ],
+              initialSelection: isValidRepeat
+                  ? widget.initialRepeatList
+                  : (dropdownItems.isNotEmpty
+                            ? dropdownItems.first['value']
+                            : 'No repeat')
+                        .toString(),
+              onSelected: widget.onRepeatListChanged,
+            );
+          },
         ),
         const SizedBox(height: 50),
         const Text(
@@ -142,22 +220,72 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            CustomListsDropDownList(
-              isHomePage: false,
-              initialTextColor: kPrimaryColor,
-              prefixIconColor: kPrimaryColor,
-              suffixIconColor: kPrimaryColor,
-              listsDropdownItems: categoriesListsDropdownItems,
-              initialSelection:
-                  widget.initialCategoriesList ??
-                  categoriesListsDropdownItems.first['value'],
-              onSelected: widget.onCategoriesListChanged,
+            StreamBuilder<List<CategoriesListsModel>>(
+              stream: databaseProvider.readCategoriesListsData(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+                final categories = snapshot.data ?? [];
+                final dropdownItems = categories
+                    .map(
+                      (category) => {
+                        'value': category.categoryListValue,
+                        'label': category.categoryListValue,
+                        'icon': Icons.blur_on_outlined,
+                      },
+                    )
+                    .toList();
+
+                final bool isValidCategory = dropdownItems.any(
+                  (item) => item['value'] == widget.initialCategoriesList,
+                );
+
+                if (!isValidCategory && widget.initialCategoriesList != null) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Category "${widget.initialCategoriesList}" no longer exists. Reverted to default.',
+                        ),
+                      ),
+                    );
+                  });
+                }
+
+                return Flexible(
+                  child: CustomCategoriesListDropDownList(
+                    initialTextColor: kPrimaryColor,
+                    prefixIconColor: kPrimaryColor,
+                    suffixIconColor: kPrimaryColor,
+                    listsDropdownItems: dropdownItems.isNotEmpty
+                        ? dropdownItems
+                        : [
+                            {
+                              'value': 'Default',
+                              'label': 'Default',
+                              'icon': Icons.blur_on_outlined,
+                            },
+                          ],
+                    initialSelection: isValidCategory
+                        ? widget.initialCategoriesList
+                        : (dropdownItems.isNotEmpty
+                                  ? dropdownItems.first['value']
+                                  : 'Default')
+                              .toString(),
+                    onSelected: widget.onCategoriesListChanged,
+                  ),
+                );
+              },
             ),
             IconButton(
               onPressed: () {
                 showAddNewToListDialog(context);
               },
-              icon: Icon(
+              icon: const Icon(
                 Icons.format_list_bulleted_add,
                 size: 30,
                 color: kPrimaryColor,

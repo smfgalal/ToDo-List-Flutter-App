@@ -22,7 +22,7 @@ class AddNewToDoText extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.w600,
             color: kPrimaryColor,
             fontSize: 18,
