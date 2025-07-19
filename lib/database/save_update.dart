@@ -5,7 +5,6 @@ import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/todo_model.dart';
 
-
 class SaveUpdateTodo {
   final TodoModel? todoModel;
   late bool isChecked;
@@ -17,6 +16,7 @@ class SaveUpdateTodo {
   final BuildContext context;
   final int? noteId;
   final GlobalKey<FormState> key;
+  final ScrollController? scrollController;
 
   SaveUpdateTodo({
     required this.key,
@@ -29,6 +29,7 @@ class SaveUpdateTodo {
     required this.originalCategory,
     required this.context,
     required this.noteId,
+    this.scrollController,
   });
 
   Future<void> saveUpdateTodos() async {
@@ -66,6 +67,21 @@ class SaveUpdateTodo {
         Navigator.pop(context);
         // ignore: use_build_context_synchronously
         BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
+        // Schedule scroll after the frame is rendered
+        if (scrollController != null &&
+            scrollController!.hasClients &&
+            noteId == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final targetOffset =
+                scrollController!.position.maxScrollExtent +
+                130;
+            scrollController!.animateTo(
+              targetOffset,
+              duration: const Duration(seconds: 1),
+              curve: Curves.easeInOut,
+            );
+          });
+        }
       } catch (e) {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error saving todo: $e')));

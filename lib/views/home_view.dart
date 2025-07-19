@@ -10,7 +10,10 @@ import 'package:todo_app/widgets/general_widgets/categories_list_drop_down_list.
 import 'package:todo_app/widgets/todo_list_item.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+  HomeView({super.key});
+
+  final ScrollController scrollController = ScrollController();
+  ScrollController get getScrollController => scrollController;
 
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -75,7 +78,7 @@ class _HomeViewState extends State<HomeView> {
                 },
               ),
             ),
-            leadingWidth: MediaQuery.of(context).size.width / 2,
+            leadingWidth: MediaQuery.of(context).size.width / 1.8,
             actions: [
               IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
               IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
@@ -92,15 +95,22 @@ class _HomeViewState extends State<HomeView> {
                 }
                 final notes = snapshot.data ?? [];
                 final filteredNotes = selectedCategory == 'All Lists'
-                    ? notes.where((note) => note.todoListItem != 'Finished').toList()
+                    ? notes
+                          .where((note) => note.todoListItem != 'Finished')
+                          .toList()
                     : selectedCategory == 'Finished'
-                        ? notes.where((note) => note.todoListItem == 'Finished').toList()
-                        : notes
-                            .where((note) => note.todoListItem == selectedCategory)
-                            .toList();
+                    ? notes
+                          .where((note) => note.todoListItem == 'Finished')
+                          .toList()
+                    : notes
+                          .where(
+                            (note) => note.todoListItem == selectedCategory,
+                          )
+                          .toList();
                 return filteredNotes.isNotEmpty
                     ? ListView.builder(
                         itemCount: filteredNotes.length,
+                        controller: widget.getScrollController,
                         itemBuilder: (context, index) {
                           return TodoListItem(todoModel: filteredNotes[index]);
                         },
@@ -119,7 +129,9 @@ class _HomeViewState extends State<HomeView> {
                 context,
                 MaterialPageRoute(
                   builder: (context) {
-                    return const AddEditToDoView();
+                    return AddEditToDoView(
+                      scrollController: widget.getScrollController,
+                    );
                   },
                 ),
               );
@@ -128,5 +140,11 @@ class _HomeViewState extends State<HomeView> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.dispose();
+    super.dispose();
   }
 }

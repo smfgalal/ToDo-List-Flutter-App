@@ -17,11 +17,13 @@ class AddEditToDoView extends StatefulWidget {
     this.todoModel,
     this.catModel,
     this.repeatModel,
+    this.scrollController,
   });
 
   final TodoModel? todoModel;
   final CategoriesListsModel? catModel;
   final RepeatListsModel? repeatModel;
+  final ScrollController? scrollController;
 
   @override
   State<AddEditToDoView> createState() => _AddEditToDoViewState();
@@ -56,8 +58,6 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
     isChecked = widget.todoModel?.isFinished ?? false;
     super.initState();
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -112,9 +112,7 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
                   setState(() {
                     _selectedCategoriesList = list;
                     if (!isChecked) {
-                      _originalCategory =
-                          list ??
-                          _originalCategory;
+                      _originalCategory = list ?? _originalCategory;
                     }
                   });
                 },
@@ -131,18 +129,19 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-            SaveUpdateTodo(
-              key: formKey,
-              todoModel: widget.todoModel,
-              isChecked: isChecked,
-              selectedToDate: _selectedToDate,
-              noteTextController: _noteTextController,
-              selectedCategoriesList: _selectedCategoriesList,
-              selectedRepeatList: _selectedRepeatList,
-              originalCategory: _originalCategory,
-              context: context,
-              noteId: _noteId,
-            ).saveUpdateTodos();
+          SaveUpdateTodo(
+            key: formKey,
+            todoModel: widget.todoModel,
+            isChecked: isChecked,
+            selectedToDate: _selectedToDate,
+            noteTextController: _noteTextController,
+            selectedCategoriesList: _selectedCategoriesList,
+            selectedRepeatList: _selectedRepeatList,
+            originalCategory: _originalCategory,
+            context: context,
+            noteId: _noteId,
+            scrollController: widget.scrollController,
+          ).saveUpdateTodos();
         },
         backgroundColor: kPrimaryColor,
         foregroundColor: Colors.white,
@@ -151,6 +150,7 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
       ),
     );
   }
+
   @override
   void dispose() {
     _noteTextController?.dispose();

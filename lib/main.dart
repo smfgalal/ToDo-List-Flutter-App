@@ -32,9 +32,8 @@ class ToDoListApp extends StatelessWidget {
             foregroundColor: Colors.white,
           ),
         ),
-        home: const HomeView(),
+        home: HomeView(),
       ),
     );
   }
-
 }
