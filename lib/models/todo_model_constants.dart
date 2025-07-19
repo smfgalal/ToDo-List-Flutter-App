@@ -1,4 +1,4 @@
-const String dbName = 'todo_datab.db';
+const String dbName = 'todo_databdf.db';
 
 const int kVersion = 1;
 
@@ -9,6 +9,7 @@ String columnCreationDate = 'creation_date';
 String columnTodoListItem = 'todo_list_item';
 String columnRepeatItem = 'repeat_item';
 String columnIsFinished = 'is_finished';
+String columnOriginalCategory = 'original_category';
 
 String tableTodo = 'Todo';
 String categoriesListsTable = 'categories_lists_table';

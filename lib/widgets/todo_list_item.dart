@@ -7,6 +7,7 @@ import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/views/add_edit_todo_view.dart';
 import 'package:todo_app/widgets/general_widgets/confirmation_dialog_message.dart';
 import 'package:todo_app/widgets/general_widgets/custom_check_box.dart';
+import 'package:todo_app/widgets/general_widgets/custom_snack_bar.dart';
 
 class TodoListItem extends StatefulWidget {
   const TodoListItem({super.key, required this.todoModel});
@@ -20,10 +21,14 @@ class TodoListItem extends StatefulWidget {
 class _TodoListItemState extends State<TodoListItem> {
   late bool isChecked;
   bool isDeleting = false;
+  late String originalCategory;
+  bool isSliding = false;
+  bool slideToRight = true;
 
   @override
   void initState() {
     isChecked = widget.todoModel.isFinished ?? false;
+    originalCategory = widget.todoModel.originalCategory ?? 'Default';
     super.initState();
   }
 
@@ -33,6 +38,7 @@ class _TodoListItemState extends State<TodoListItem> {
     if (oldWidget.todoModel != widget.todoModel) {
       setState(() {
         isChecked = widget.todoModel.isFinished ?? false;
+        originalCategory = widget.todoModel.originalCategory ?? 'Default';
       });
     }
   }
@@ -40,9 +46,6 @@ class _TodoListItemState extends State<TodoListItem> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    // if (widget.todoModel.id == null) {
-    //   return const SizedBox.shrink();
-    // }
 
     return Dismissible(
       key: ValueKey<int>(widget.todoModel.id!),
@@ -104,13 +107,15 @@ class _TodoListItemState extends State<TodoListItem> {
                   setState(() {
                     isDeleting = true;
                   });
-                   if (context.mounted) {
+                  if (context.mounted) {
                     Navigator.pop(context, true);
                   }
                   await Future.delayed(const Duration(seconds: 1));
                   await databaseProvider.deleteNote(widget.todoModel.id);
                   if (context.mounted) {
-                    BlocProvider.of<ReadTodoNotesCubit>(context,).fetchAllNotes();
+                    BlocProvider.of<ReadTodoNotesCubit>(
+                      context,
+                    ).fetchAllNotes();
                   }
                 },
                 onPressedNo: () {
@@ -132,109 +137,141 @@ class _TodoListItemState extends State<TodoListItem> {
               ),
             );
           },
-          child: SizedBox(
-            height: 120,
-            child: Stack(
-              children: [
-                Card(
-                  color: kPrimaryColor,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const SizedBox(width: 8),
-                      CustomCheckBox(
-                        value: isChecked,
-                        borderColor: Colors.white,
-                        onChanged: (value) async {
-                          if (value != null) {
-                            setState(() {
-                              isChecked = value;
-                            });
-                            final updatedTodo = TodoModel(
-                              id: widget.todoModel.id,
-                              note: widget.todoModel.note,
-                              toDate: widget.todoModel.toDate,
-                              creationDate: widget.todoModel.creationDate,
-                              todoListItem: widget.todoModel.todoListItem,
-                              todoRepeatItem: widget.todoModel.todoRepeatItem,
-                              isFinished: value,
-                            );
-                            await databaseProvider.updateData(updatedTodo);
-                            if (context.mounted) {
-                              BlocProvider.of<ReadTodoNotesCubit>(
-                                context,
-                              ).fetchAllNotes();
-                            }
-                          }
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.todoModel.note,
-                            maxLines: 1,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Text(
-                            widget.todoModel.toDate,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  right: 16,
-                  bottom: 14,
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width / 1.1,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Text(
-                            'Creation Date: ${widget.todoModel.creationDate}',
-                            style: const TextStyle(
-                              color: Color.fromARGB(255, 180, 162, 244),
-                              fontSize: 12,
-                            ),
-                          ),
-                          Text(
-                            'List: ${widget.todoModel.todoListItem}',
-                            style: const TextStyle(
-                              color: Color.fromARGB(255, 180, 162, 244),
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          child: item(context),
         ),
         secondChild: const SizedBox.shrink(),
         crossFadeState: isDeleting && widget.todoModel.id == null
             ? CrossFadeState.showSecond
             : CrossFadeState.showFirst,
         duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  SizedBox item(BuildContext context) {
+    return SizedBox(
+      height: 130,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        transform: Matrix4.translationValues(
+          isSliding ? (slideToRight ? MediaQuery.of(context).size.width : -MediaQuery.of(context).size.width) : 0,
+          0,
+          0,
+        ),
+        curve: Curves.fastEaseInToSlowEaseOut,
+        child: Stack(
+          children: [
+            Card(
+              color: kPrimaryColor,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const SizedBox(width: 8),
+                  CustomCheckBox(
+                    value: isChecked,
+                    borderColor: Colors.white,
+                    onChanged: (value) async {
+                      if (value != null) {
+                        setState(() {
+                          isChecked = value;
+                          isSliding = true;
+                          slideToRight = value;
+                        });
+                        await Future.delayed(const Duration(milliseconds: 300));
+                        final updatedTodo = TodoModel(
+                          id: widget.todoModel.id,
+                          note: widget.todoModel.note,
+                          toDate: widget.todoModel.toDate,
+                          creationDate: widget.todoModel.creationDate,
+                          todoListItem: value ? 'Finished' : originalCategory,
+                          todoRepeatItem: widget.todoModel.todoRepeatItem,
+                          isFinished: value,
+                          originalCategory: widget.todoModel.originalCategory,
+                        );
+                        await databaseProvider.updateData(updatedTodo);
+                        if (context.mounted) {
+                          BlocProvider.of<ReadTodoNotesCubit>(
+                            context,
+                          ).fetchAllNotes();
+                          if (value) {
+                            CustomSnackBar().snackBarMessage(
+                              context: context,
+                              backGroundColor: const Color.fromARGB(255, 244, 244, 244),
+                              closeIconColor: kPrimaryColor,
+                              message: '(${widget.todoModel.note}) Task marked as Finished successfully',
+                              messageColor: kPrimaryColor,
+                              duration: 2,
+                              showCloseIcon: true,
+                              borderColor: kPrimaryColor,
+                            );
+                          }
+                          setState(() {
+                            isSliding = false;
+                          });
+                        }
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.todoModel.note,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        widget.todoModel.toDate,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              right: 16,
+              bottom: 18,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width / 1.1,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Text(
+                        'Creation Date: ${widget.todoModel.creationDate}',
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 180, 162, 244),
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        'List: ${widget.todoModel.todoListItem}',
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 180, 162, 244),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

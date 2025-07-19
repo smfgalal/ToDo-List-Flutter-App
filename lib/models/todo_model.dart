@@ -8,6 +8,7 @@ class TodoModel {
   String? todoListItem;
   String? todoRepeatItem;
   bool? isFinished;
+  final String? originalCategory;
 
   TodoModel({
     this.id,
@@ -17,6 +18,7 @@ class TodoModel {
     this.todoListItem,
     this.todoRepeatItem,
     this.isFinished,
+    this.originalCategory,
   });
 
   factory TodoModel.fromMap(Map<String, dynamic> map) {
@@ -28,6 +30,20 @@ class TodoModel {
       todoListItem: map[columnTodoListItem] as String?,
       todoRepeatItem: map[columnRepeatItem] as String?,
       isFinished: map[columnIsFinished] == 1 ? true : false,
+      originalCategory: map[columnOriginalCategory] as String?,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      columnId: id,
+      columnNote: note,
+      columnDate: toDate,
+      columnCreationDate: creationDate,
+      columnTodoListItem: todoListItem,
+      columnRepeatItem: todoRepeatItem,
+      columnIsFinished: isFinished ?? false ? 1 : 0,
+      columnOriginalCategory: originalCategory,
+    };
   }
 }

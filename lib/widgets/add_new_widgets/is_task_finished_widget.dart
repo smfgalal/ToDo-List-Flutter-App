@@ -12,12 +12,14 @@ class IsTaskFinishedWidget extends StatefulWidget {
     super.key,
     required this.isChecked,
     required this.todoModel,
-    this.onChanged, // Add callback
+    this.onChanged,
+    this.originalCategory,
   });
 
   late bool isChecked;
   final TodoModel todoModel;
-  final ValueChanged<bool>? onChanged; // Callback for checkbox changes
+  final ValueChanged<bool>? onChanged;
+  final String? originalCategory;
 
   @override
   State<IsTaskFinishedWidget> createState() => _IsTaskFinishedWidgetState();
@@ -42,19 +44,23 @@ class _IsTaskFinishedWidgetState extends State<IsTaskFinishedWidget> {
               setState(() {
                 widget.isChecked = value;
               });
-              widget.onChanged?.call(value); // Notify parent
               final updatedTodo = TodoModel(
                 id: widget.todoModel.id,
                 note: widget.todoModel.note,
                 toDate: widget.todoModel.toDate,
                 creationDate: widget.todoModel.creationDate,
-                todoListItem: widget.todoModel.todoListItem,
+                todoListItem: value
+                    ? 'Finished'
+                    : widget
+                          .originalCategory, // Restore original category when unchecked
                 todoRepeatItem: widget.todoModel.todoRepeatItem,
                 isFinished: value,
+                originalCategory: widget.todoModel.originalCategory,
               );
               await databaseProvider.updateData(updatedTodo);
-              // ignore: use_build_context_synchronously
-              BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
+              if (context.mounted) {
+                BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
+              }
             }
           },
         ),

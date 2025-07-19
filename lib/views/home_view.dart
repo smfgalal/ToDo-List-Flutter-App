@@ -21,7 +21,6 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void initState() {
-   //databaseProvider.debugDatabaseContents();
     BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
     super.initState();
   }
@@ -54,19 +53,19 @@ class _HomeViewState extends State<HomeView> {
                         'icon': Icons.blur_on_outlined,
                       };
                     }),
-                  ];
-                  dropdownItems.add({
+                    {
                       'value': 'Finished',
                       'label': 'Finished',
                       'icon': Icons.done,
-                    },);
-                  selectedCategory = dropdownItems.first['value'].toString();
+                    },
+                  ];
+                  selectedCategory ??= dropdownItems.first['value'].toString();
                   return CustomCategoriesListDropDownList(
                     initialTextColor: Colors.white,
                     prefixIconColor: Colors.white,
                     suffixIconColor: Colors.white,
                     listsDropdownItems: dropdownItems,
-                    initialSelection: dropdownItems.first['value'].toString(),
+                    initialSelection: selectedCategory,
                     onSelected: (value) {
                       setState(() {
                         selectedCategory = value;
@@ -93,12 +92,12 @@ class _HomeViewState extends State<HomeView> {
                 }
                 final notes = snapshot.data ?? [];
                 final filteredNotes = selectedCategory == 'All Lists'
-                    ? notes
-                    : notes
-                          .where(
-                            (note) => note.todoListItem == selectedCategory,
-                          )
-                          .toList();
+                    ? notes.where((note) => note.todoListItem != 'Finished').toList()
+                    : selectedCategory == 'Finished'
+                        ? notes.where((note) => note.todoListItem == 'Finished').toList()
+                        : notes
+                            .where((note) => note.todoListItem == selectedCategory)
+                            .toList();
                 return filteredNotes.isNotEmpty
                     ? ListView.builder(
                         itemCount: filteredNotes.length,

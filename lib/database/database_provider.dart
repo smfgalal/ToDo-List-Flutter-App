@@ -54,7 +54,8 @@ class DatabaseProvider {
         $columnCreationDate TEXT,
         $columnTodoListItem TEXT,
         $columnRepeatItem TEXT,
-        $columnIsFinished BOOLEAN)
+        $columnIsFinished BOOLEAN,
+        $columnOriginalCategory TEXT)
     ''');
 
     await db.execute('''
@@ -124,6 +125,7 @@ class DatabaseProvider {
           columnTodoListItem,
           columnRepeatItem,
           columnIsFinished,
+          columnOriginalCategory,
         ],
       );
 
@@ -192,52 +194,13 @@ class DatabaseProvider {
           columnTodoListItem,
           columnRepeatItem,
           columnIsFinished,
+          columnOriginalCategory,
         ],
         where: '$columnId = ?',
         whereArgs: <Object?>[id],
       );
       if (list.isNotEmpty) {
         return TodoModel.fromMap(list.first);
-      }
-      return null;
-    } catch (e) {
-      rethrow;
-    }
-  }
-  Future<CategoriesListsModel?> readCategoryListData(int? id) async {
-    try {
-      Database? mydb = await db;
-      var list = await mydb!.query(
-        categoriesListsTable,
-        columns: [
-          columnId,
-          columnCategoryListTitle,
-        ],
-        where: '$columnId = ?',
-        whereArgs: <Object?>[id],
-      );
-      if (list.isNotEmpty) {
-        return CategoriesListsModel.fromMap(list.first);
-      }
-      return null;
-    } catch (e) {
-      rethrow;
-    }
-  }
-  Future<RepeatListsModel?> readRepeatListData(int? id) async {
-    try {
-      Database? mydb = await db;
-      var list = await mydb!.query(
-        repeatListTable,
-        columns: [
-          columnId,
-          columnRepeatListTitle,
-        ],
-        where: '$columnId = ?',
-        whereArgs: <Object?>[id],
-      );
-      if (list.isNotEmpty) {
-        return RepeatListsModel.fromMap(list.first);
       }
       return null;
     } catch (e) {
@@ -255,6 +218,7 @@ class DatabaseProvider {
         columnTodoListItem: todo.todoListItem,
         columnRepeatItem: todo.todoRepeatItem,
         columnIsFinished: todo.isFinished ?? false ? 1 : 0,
+        columnOriginalCategory: todo.originalCategory,
       });
       await refreshTodos();
       return id;
@@ -301,6 +265,7 @@ class DatabaseProvider {
           columnTodoListItem: todo.todoListItem,
           columnRepeatItem: todo.todoRepeatItem,
           columnIsFinished: todo.isFinished ?? false ? 1 : 0,
+          columnOriginalCategory: todo.originalCategory,
         },
         where: '$columnId = ?',
         whereArgs: [todo.id],

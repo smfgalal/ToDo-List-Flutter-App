@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_app/constants.dart';
-import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
+import 'package:todo_app/database/save_update.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/categories_list_model.dart';
 import 'package:todo_app/models/repeat_list_model.dart';
@@ -36,6 +35,7 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
   DateTime? _selectedToDate;
   String? _selectedCategoriesList;
   String? _selectedRepeatList;
+  late String _originalCategory;
 
   int? get _noteId => widget.todoModel?.id;
 
@@ -52,51 +52,12 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
         : null;
     _selectedCategoriesList = widget.todoModel?.todoListItem;
     _selectedRepeatList = widget.todoModel?.todoRepeatItem;
+    _originalCategory = widget.todoModel?.originalCategory ?? 'Default';
     isChecked = widget.todoModel?.isFinished ?? false;
     super.initState();
   }
 
-  @override
-  void dispose() {
-    _noteTextController?.dispose();
-    _toDateTextController?.dispose();
-    super.dispose();
-  }
-
-  Future<void> save() async {
-    if (formKey.currentState!.validate()) {
-      if (_selectedToDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a due date.')),
-        );
-        return;
-      }
-      try {
-        final todo = TodoModel(
-          id: _noteId,
-          note: _noteTextController!.text,
-          toDate: DateFormat.yMMMMd().add_jm().format(_selectedToDate!),
-          creationDate: DateFormat.yMMMMd().add_jm().format(DateTime.now()),
-          todoListItem: _selectedCategoriesList ?? 'Default',
-          todoRepeatItem: _selectedRepeatList ?? 'No repeat',
-          isFinished: isChecked,
-        );
-        if (_noteId == null) {
-          await databaseProvider.saveData(todo);
-        } else {
-          await databaseProvider.updateData(todo);
-        }
-        if (mounted) {
-          Navigator.pop(context);
-          BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
-        }
-      } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error saving todo: $e')));
-      }
-    }
-  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -124,8 +85,12 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
                       onChanged: (value) {
                         setState(() {
                           isChecked = value;
+                          _selectedCategoriesList = value
+                              ? 'Finished'
+                              : _originalCategory;
                         });
                       },
+                      originalCategory: _originalCategory,
                     )
                   : const SizedBox(),
               const SizedBox(height: 64),
@@ -146,6 +111,11 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
                 onCategoriesListChanged: (list) {
                   setState(() {
                     _selectedCategoriesList = list;
+                    if (!isChecked) {
+                      _originalCategory =
+                          list ??
+                          _originalCategory;
+                    }
                   });
                 },
                 initialRepeatList: _selectedRepeatList,
@@ -161,7 +131,18 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          save();
+            SaveUpdateTodo(
+              key: formKey,
+              todoModel: widget.todoModel,
+              isChecked: isChecked,
+              selectedToDate: _selectedToDate,
+              noteTextController: _noteTextController,
+              selectedCategoriesList: _selectedCategoriesList,
+              selectedRepeatList: _selectedRepeatList,
+              originalCategory: _originalCategory,
+              context: context,
+              noteId: _noteId,
+            ).saveUpdateTodos();
         },
         backgroundColor: kPrimaryColor,
         foregroundColor: Colors.white,
@@ -169,5 +150,11 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
         child: const Icon(Icons.check, size: 30, color: kPrimaryLightColor),
       ),
     );
+  }
+  @override
+  void dispose() {
+    _noteTextController?.dispose();
+    _toDateTextController?.dispose();
+    super.dispose();
   }
 }
