@@ -7,6 +7,7 @@ import 'package:todo_app/models/categories_list_model.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/views/add_edit_todo_view.dart';
 import 'package:todo_app/widgets/general_widgets/categories_list_drop_down_list.dart';
+import 'package:todo_app/widgets/general_widgets/custom_popup_menu.dart';
 import 'package:todo_app/widgets/todo_list_item.dart';
 
 class HomeView extends StatefulWidget {
@@ -81,7 +82,7 @@ class _HomeViewState extends State<HomeView> {
             leadingWidth: MediaQuery.of(context).size.width / 1.8,
             actions: [
               IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+              const CustomPopUpMenu(),
             ],
             toolbarHeight: 75,
           ),
@@ -107,15 +108,21 @@ class _HomeViewState extends State<HomeView> {
                             (note) => note.todoListItem == selectedCategory,
                           )
                           .toList();
-                return filteredNotes.isNotEmpty
-                    ? ListView.builder(
-                        itemCount: filteredNotes.length,
-                        controller: widget.getScrollController,
-                        itemBuilder: (context, index) {
-                          return TodoListItem(todoModel: filteredNotes[index]);
-                        },
-                      )
-                    : const Center(child: Text('There are no data to show!'));
+                if (snapshot.hasData) {
+                  return filteredNotes.isNotEmpty
+                      ? ListView.builder(
+                          itemCount: filteredNotes.length,
+                          controller: widget.getScrollController,
+                          itemBuilder: (context, index) {
+                            return TodoListItem(
+                              todoModel: filteredNotes[index],
+                            );
+                          },
+                        )
+                      : const Center(child: Text('There are no data to show!'));
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
               },
             ),
           ),
@@ -148,3 +155,4 @@ class _HomeViewState extends State<HomeView> {
     super.dispose();
   }
 }
+

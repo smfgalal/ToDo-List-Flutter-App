@@ -181,12 +181,8 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
             ),
             IconButton(
               onPressed: () {
-                //showAddNewToListDialog(context);
                 ShowAddToListDialog(
-                  initialCategoriesList: widget.initialCategoriesList,
                   onCategoriesListChanged: widget.onCategoriesListChanged,
-                  initialRepeatList: widget.initialRepeatList,
-                  onRepeatListChanged: widget.onRepeatListChanged,
                   newListController: _newListController,
                   formKey: formKey,
                 ).showAddNewToListDialog(context);

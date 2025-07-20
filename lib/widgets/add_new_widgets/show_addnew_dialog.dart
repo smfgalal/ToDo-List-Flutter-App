@@ -2,26 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:todo_app/constants.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/categories_list_model.dart';
+import 'package:todo_app/widgets/general_widgets/custom_snack_bar.dart';
 import 'package:todo_app/widgets/general_widgets/custom_text_field.dart';
 
 class ShowAddToListDialog {
-  final String? initialCategoriesList;
   final ValueChanged<String?>? onCategoriesListChanged;
-  final String? initialRepeatList;
-  final ValueChanged<String?>? onRepeatListChanged;
   final TextEditingController newListController;
   final GlobalKey<FormState> formKey;
+  final CategoriesListsModel? categoryModel;
+  final String? initialvalue;
   ShowAddToListDialog({
-    required this.initialCategoriesList,
-    required this.onCategoriesListChanged,
-    required this.initialRepeatList,
-    required this.onRepeatListChanged,
+    this.onCategoriesListChanged,
     required this.newListController,
     required this.formKey,
+    this.categoryModel,
+    this.initialvalue,
   });
 
   Future<void> showAddNewToListDialog(BuildContext context) async {
     newListController.clear();
+    if (initialvalue != null) {
+      newListController.text = initialvalue!; // Set initial text in controller
+    }
 
     final result = await showDialog<String>(
       context: context,
@@ -42,13 +44,20 @@ class ShowAddToListDialog {
                         final categories = snapshot.data ?? [];
                         return CustomTextField(
                           textController: newListController,
-                          hintText: 'New list name',
+                          hintText: categoryModel == null
+                              ? 'New list name'
+                              : 'Update list name',
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
+                            if (value == null || value.trim().isEmpty) {
                               return 'List name is required';
                             }
                             if (categories.any(
-                              (item) => item.categoryListValue == value,
+                              (item) =>
+                                  item.categoryListValue
+                                          ?.trim()
+                                          .toLowerCase() ==
+                                      value.trim().toLowerCase() &&
+                                  item.id != categoryModel?.id,
                             )) {
                               return 'List name already exists';
                             }
@@ -99,9 +108,9 @@ class ShowAddToListDialog {
                             color: kPrimaryColor,
                             borderRadius: BorderRadius.all(Radius.circular(8)),
                           ),
-                          child: const Text(
-                            'Add List',
-                            style: TextStyle(color: Colors.white),
+                          child: Text(
+                            categoryModel == null ? 'Add List' : 'Update List',
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
                       ),
@@ -116,10 +125,35 @@ class ShowAddToListDialog {
     );
 
     if (result != null && context.mounted) {
-      await databaseProvider.saveCategoriesListData(
-        CategoriesListsModel(categoryListValue: result),
-      );
-      onCategoriesListChanged?.call(result);
+      try {
+        if (categoryModel == null) {
+          await databaseProvider.saveCategoriesListData(
+            CategoriesListsModel(categoryListValue: result),
+          );
+        } else {
+          await databaseProvider.updateCategoryListItem(
+            CategoriesListsModel(
+              id: categoryModel!.id,
+              categoryListValue: result,
+            ),
+          );
+        }
+        onCategoriesListChanged?.call(result);
+      } catch (e) {
+        if (context.mounted) {
+          CustomSnackBar().snackBarMessage(
+            context: context,
+            backGroundColor: const Color.fromARGB(255, 244, 244, 244),
+            closeIconColor: kPrimaryColor,
+            message:
+                'Tasks list with name "${newListController.text}" is already exists. Please choose another one.',
+            messageColor: kPrimaryColor,
+            duration: 2,
+            showCloseIcon: true,
+            borderColor: kPrimaryColor,
+          );
+        }
+      }
     }
   }
 }

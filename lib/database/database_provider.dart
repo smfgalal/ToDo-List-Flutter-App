@@ -174,13 +174,7 @@ class DatabaseProvider {
   Stream<List<RepeatListsModel>> readRepeatListsData() {
     return _repeatListsStreamController.stream;
   }
-// Future<void> debugDatabaseContents() async {
-//   final db = await this.db;
-//   final categories = await db!.query(categoriesListsTable);
-//   final repeats = await db.query(repeatListTable);
-//   print('Categories: $categories');
-//   print('Repeats: $repeats');
-// }
+
   Future<TodoModel?> readNoteData(int? id) async {
     try {
       Database? mydb = await db;
@@ -230,7 +224,18 @@ class DatabaseProvider {
   Future<int> saveCategoriesListData(CategoriesListsModel categories) async {
     try {
       Database? mydb = await db;
-      int id = await mydb!.insert(categoriesListsTable, {
+      var existing = await mydb!.query(
+        categoriesListsTable,
+        where: '$columnCategoryListTitle = ?',
+        whereArgs: [categories.categoryListValue?.trim()],
+      );
+      if (existing.isNotEmpty) {
+        throw Exception(
+          'Task list with name "${categories.categoryListValue}" already exists',
+        );
+      }
+
+      int id = await mydb.insert(categoriesListsTable, {
         columnCategoryListTitle: categories.categoryListValue,
       });
       await refreshCategoriesList();
@@ -277,6 +282,35 @@ class DatabaseProvider {
     }
   }
 
+  Future<int> updateCategoryListItem(CategoriesListsModel categoty) async {
+    try {
+      Database? mydb = await db;
+      int count = await mydb!.update(
+        categoriesListsTable,
+        {columnCategoryListTitle: categoty.categoryListValue},
+        where: '$columnId = ?',
+        whereArgs: [categoty.id],
+      );
+      await refreshCategoriesList();
+      return count;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<int> getTaskCountForCategory(String? categoryValue) async {
+    try {
+      Database? mydb = await db;
+      var result = await mydb!.rawQuery(
+        'SELECT COUNT(*) as count FROM $tableTodo WHERE $columnOriginalCategory = ?',
+        [categoryValue],
+      );
+      return Sqflite.firstIntValue(result) ?? 0;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> deleteNote(int? id) async {
     try {
       Database? mydb = await db;
@@ -286,6 +320,20 @@ class DatabaseProvider {
         whereArgs: <Object?>[id],
       );
       await refreshTodos();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteCategoryListItem(int? id) async {
+    try {
+      Database? mydb = await db;
+      await mydb!.delete(
+        categoriesListsTable,
+        where: '$columnId = ?',
+        whereArgs: <Object?>[id],
+      );
+      await refreshCategoriesList();
     } catch (e) {
       rethrow;
     }
