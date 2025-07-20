@@ -1,6 +1,7 @@
 // repeat_drop_down_list.dart
 import 'package:flutter/material.dart';
-import 'package:todo_app/constants.dart';
+import 'package:todo_app/helpers/change_theme.dart';
+import 'package:todo_app/helpers/constants.dart';
 
 class CustomRepeatDropDownList extends StatefulWidget {
   const CustomRepeatDropDownList({
@@ -74,13 +75,28 @@ class _CustomDropDownListState extends State<CustomRepeatDropDownList> {
         return DropdownMenuEntry<String>(
           value: item['value'],
           label: item['label'],
-          leadingIcon: Icon(item['icon'], color: kPrimaryColor),
+          leadingIcon: Icon(
+            item['icon'],
+            color: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+          ),
           style: ButtonStyle(
             surfaceTintColor: WidgetStateColor.resolveWith(
-              (_) => kPrimaryColor,
+              (_) =>
+                  ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+            ),
+            backgroundColor: WidgetStateColor.resolveWith(
+              (_) => ChangeTheme().theme(context)
+                  ? const Color.fromARGB(255, 18, 18, 18)
+                  : const Color.fromARGB(255, 242, 242, 242),
             ),
             shape: WidgetStateOutlinedBorder.resolveWith((_) {
-              return LinearBorder.bottom(side: const BorderSide(color: Colors.white));
+              return LinearBorder.bottom(
+                side: BorderSide(
+                  color: ChangeTheme().theme(context)
+                      ? const Color.fromARGB(255, 55, 55, 55)
+                      : const Color.fromARGB(255, 208, 208, 208),
+                ),
+              );
             }),
           ),
         );

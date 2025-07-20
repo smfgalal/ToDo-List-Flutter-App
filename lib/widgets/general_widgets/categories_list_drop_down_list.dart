@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/constants.dart';
+import 'package:todo_app/helpers/change_theme.dart';
+import 'package:todo_app/helpers/constants.dart';
 
 class CustomCategoriesListDropDownList extends StatefulWidget {
   const CustomCategoriesListDropDownList({
@@ -24,12 +25,14 @@ class CustomCategoriesListDropDownList extends StatefulWidget {
       _CustomCategoriesListDropDownListState();
 }
 
-class _CustomCategoriesListDropDownListState extends State<CustomCategoriesListDropDownList> {
+class _CustomCategoriesListDropDownListState
+    extends State<CustomCategoriesListDropDownList> {
   late String? selectedValue;
 
   @override
   void initState() {
-    selectedValue = widget.initialSelection ?? widget.listsDropdownItems.first['value'];
+    selectedValue =
+        widget.initialSelection ?? widget.listsDropdownItems.first['value'];
     // Notify parent with initial selection
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onSelected?.call(selectedValue);
@@ -62,14 +65,27 @@ class _CustomCategoriesListDropDownListState extends State<CustomCategoriesListD
         return DropdownMenuEntry<String>(
           value: item['value'],
           label: item['label'],
-          leadingIcon: Icon(item['icon'], color: kPrimaryColor),
+          leadingIcon: Icon(
+            item['icon'],
+            color: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+          ),
           style: ButtonStyle(
             surfaceTintColor: WidgetStateColor.resolveWith(
-              (_) => kPrimaryColor,
+              (_) =>
+                  ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+            ),
+            backgroundColor: WidgetStateColor.resolveWith(
+              (_) => ChangeTheme().theme(context)
+                  ? const Color.fromARGB(255, 18, 18, 18)
+                  : const Color.fromARGB(255, 242, 242, 242),
             ),
             shape: WidgetStateOutlinedBorder.resolveWith((_) {
               return LinearBorder.bottom(
-                side: const BorderSide(color: Colors.white),
+                side: BorderSide(
+                  color: ChangeTheme().theme(context)
+                      ? const Color.fromARGB(255, 55, 55, 55)
+                      : const Color.fromARGB(255, 208, 208, 208),
+                ),
               );
             }),
           ),

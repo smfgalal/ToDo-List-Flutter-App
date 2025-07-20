@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/constants.dart';
+import 'package:todo_app/helpers/change_theme.dart';
+import 'package:todo_app/helpers/constants.dart';
 import 'package:todo_app/widgets/general_widgets/custom_text_field.dart';
 
 class AddNewToDoText extends StatelessWidget {
@@ -17,15 +18,16 @@ class AddNewToDoText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style:  TextStyle(
             fontWeight: FontWeight.w600,
-            color: kPrimaryColor,
             fontSize: 18,
+            color: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
           ),
         ),
         const SizedBox(height: 8),

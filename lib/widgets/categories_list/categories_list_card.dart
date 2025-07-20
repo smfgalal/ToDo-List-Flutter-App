@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/constants.dart';
+import 'package:todo_app/helpers/change_theme.dart';
+import 'package:todo_app/helpers/constants.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/categories_list_model.dart';
 import 'package:todo_app/widgets/add_new_widgets/show_addnew_dialog.dart';
@@ -23,7 +24,9 @@ class CategoriesListCard extends StatelessWidget {
     return SizedBox(
       height: 100,
       child: Card(
-        color: kPrimaryColor,
+        color: ChangeTheme().theme(context)
+            ? kPrimaryDarkColor
+            : kPrimaryColor,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(

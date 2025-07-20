@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:todo_app/constants.dart';
 import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
+import 'package:todo_app/helpers/change_theme.dart';
+import 'package:todo_app/helpers/constants.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/views/add_edit_todo_view.dart';
@@ -154,7 +155,11 @@ class _TodoListItemState extends State<TodoListItem> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         transform: Matrix4.translationValues(
-          isSliding ? (slideToRight ? MediaQuery.of(context).size.width : -MediaQuery.of(context).size.width) : 0,
+          isSliding
+              ? (slideToRight
+                    ? MediaQuery.of(context).size.width
+                    : -MediaQuery.of(context).size.width)
+              : 0,
           0,
           0,
         ),
@@ -162,7 +167,9 @@ class _TodoListItemState extends State<TodoListItem> {
         child: Stack(
           children: [
             Card(
-              color: kPrimaryColor,
+              color: ChangeTheme().theme(context)
+                  ? kPrimaryDarkColor
+                  : kPrimaryColor,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -196,9 +203,15 @@ class _TodoListItemState extends State<TodoListItem> {
                           if (value) {
                             CustomSnackBar().snackBarMessage(
                               context: context,
-                              backGroundColor: const Color.fromARGB(255, 244, 244, 244),
+                              backGroundColor: const Color.fromARGB(
+                                255,
+                                244,
+                                244,
+                                244,
+                              ),
                               closeIconColor: kPrimaryColor,
-                              message: '(${widget.todoModel.note}) Task marked as Finished successfully',
+                              message:
+                                  '(${widget.todoModel.note}) Task marked as Finished successfully',
                               messageColor: kPrimaryColor,
                               duration: 2,
                               showCloseIcon: true,

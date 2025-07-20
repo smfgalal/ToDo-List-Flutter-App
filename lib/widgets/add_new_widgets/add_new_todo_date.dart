@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:todo_app/constants.dart';
+import 'package:todo_app/helpers/change_theme.dart';
+import 'package:todo_app/helpers/constants.dart';
 import 'package:todo_app/widgets/general_widgets/custom_text_field.dart';
 
 class AddNewToDoDate extends StatefulWidget {
@@ -74,9 +75,9 @@ class _AddNewToDoDateState extends State<AddNewToDoDate> {
       children: [
         Text(
           widget.title,
-          style: const TextStyle(
+          style:  TextStyle(
             fontWeight: FontWeight.w600,
-            color: kPrimaryColor,
+            color: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
             fontSize: 18,
           ),
         ),

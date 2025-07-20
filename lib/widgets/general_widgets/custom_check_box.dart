@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/constants.dart';
+import 'package:todo_app/helpers/constants.dart';
 
 class CustomCheckBox extends StatelessWidget {
   final bool? value;

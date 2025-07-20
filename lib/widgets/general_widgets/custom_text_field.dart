@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/constants.dart';
 
 class CustomTextField extends StatelessWidget {
   const CustomTextField({
@@ -33,15 +32,15 @@ class CustomTextField extends StatelessWidget {
       readOnly: isReadOnly,
       decoration: InputDecoration(
         hintText: hintText,
-        border: const UnderlineInputBorder(
-          borderSide: BorderSide(color: kPrimaryColor),
-        ),
-        enabledBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: kPrimaryColor),
-        ),
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: kPrimaryLightColor),
-        ),
+        // border: const UnderlineInputBorder(
+        //   borderSide: BorderSide(color: kPrimaryColor),
+        // ),
+        // enabledBorder: const UnderlineInputBorder(
+        //   borderSide: BorderSide(color: kPrimaryColor),
+        // ),
+        // focusedBorder: const UnderlineInputBorder(
+        //   borderSide: BorderSide(color: kPrimaryLightColor),
+        // ),
       ),
     );
   }

@@ -1,4 +1,4 @@
-import 'package:todo_app/models/todo_model_constants.dart';
+import 'package:todo_app/helpers/todo_model_constants.dart';
 
 class CategoriesListsModel {
   final int? id;

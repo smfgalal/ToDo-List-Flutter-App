@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:todo_app/constants.dart';
 import 'package:todo_app/database/save_update.dart';
+import 'package:todo_app/helpers/change_theme.dart';
+import 'package:todo_app/helpers/constants.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/categories_list_model.dart';
 import 'package:todo_app/models/repeat_list_model.dart';
@@ -143,10 +144,18 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
             scrollController: widget.scrollController,
           ).saveUpdateTodos();
         },
-        backgroundColor: kPrimaryColor,
+        backgroundColor: ChangeTheme().theme(context)
+            ? Colors.white
+            : kPrimaryColor,
         foregroundColor: Colors.white,
         shape: const CircleBorder(),
-        child: const Icon(Icons.check, size: 30, color: kPrimaryLightColor),
+        child: Icon(
+          Icons.check,
+          size: 30,
+          color: ChangeTheme().theme(context)
+              ? kPrimaryColor
+              : kPrimaryLightColor,
+        ),
       ),
     );
   }

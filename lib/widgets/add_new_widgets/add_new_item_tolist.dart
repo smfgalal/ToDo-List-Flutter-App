@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/constants.dart';
+import 'package:todo_app/helpers/change_theme.dart';
+import 'package:todo_app/helpers/constants.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/categories_list_model.dart';
 import 'package:todo_app/models/repeat_list_model.dart';
@@ -37,11 +38,10 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+         const Text(
           'Repeat task',
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            color: kPrimaryColor,
             fontSize: 18,
           ),
         ),
@@ -80,9 +80,9 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
               });
             }
             return CustomRepeatDropDownList(
-              initialTextColor: kPrimaryColor,
-              prefixIconColor: kPrimaryColor,
-              suffixIconColor: kPrimaryColor,
+              initialTextColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+              prefixIconColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+              suffixIconColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
               listsDropdownItems: dropdownItems.isNotEmpty
                   ? dropdownItems
                   : [
@@ -103,11 +103,10 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
           },
         ),
         const SizedBox(height: 50),
-        const Text(
+         const Text(
           'Task list',
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            color: kPrimaryColor,
             fontSize: 18,
           ),
         ),
@@ -143,22 +142,22 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
                     CustomSnackBar().snackBarMessage(
                       context: context,
                       backGroundColor: const Color.fromARGB(255, 244, 244, 244),
-                      closeIconColor: kPrimaryColor,
+                      closeIconColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
                       message:
                           'Category "${widget.initialCategoriesList}" no longer exists. Reverted to default.',
-                      messageColor: kPrimaryColor,
+                      messageColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
                       duration: 2,
                       showCloseIcon: true,
-                      borderColor: kPrimaryColor,
+                      borderColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
                     );
                   });
                 }
 
                 return Flexible(
                   child: CustomCategoriesListDropDownList(
-                    initialTextColor: kPrimaryColor,
-                    prefixIconColor: kPrimaryColor,
-                    suffixIconColor: kPrimaryColor,
+                    initialTextColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+                    prefixIconColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+                    suffixIconColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
                     listsDropdownItems: dropdownItems.isNotEmpty
                         ? dropdownItems
                         : [
@@ -187,10 +186,9 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
                   formKey: formKey,
                 ).showAddNewToListDialog(context);
               },
-              icon: const Icon(
+              icon:  const Icon(
                 Icons.format_list_bulleted_add,
                 size: 30,
-                color: kPrimaryColor,
               ),
             ),
           ],

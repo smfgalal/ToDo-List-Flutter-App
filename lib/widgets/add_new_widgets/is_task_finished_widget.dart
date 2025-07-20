@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:todo_app/constants.dart';
 import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
+import 'package:todo_app/helpers/change_theme.dart';
+import 'package:todo_app/helpers/constants.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/widgets/general_widgets/custom_check_box.dart';
@@ -38,7 +39,7 @@ class _IsTaskFinishedWidgetState extends State<IsTaskFinishedWidget> {
       children: [
         CustomCheckBox(
           value: widget.isChecked,
-          borderColor: kPrimaryColor,
+          borderColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
           onChanged: (value) async {
             if (value != null) {
               setState(() {
@@ -66,7 +67,7 @@ class _IsTaskFinishedWidgetState extends State<IsTaskFinishedWidget> {
         ),
         const Text(
           'Task finished?',
-          style: TextStyle(color: kPrimaryColor, fontSize: 16),
+          style: TextStyle(fontSize: 16),
         ),
       ],
     );

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:todo_app/constants.dart';
+import 'package:todo_app/helpers/change_theme.dart';
+import 'package:todo_app/helpers/constants.dart';
 import 'package:todo_app/views/add_edit_todo_view.dart';
 import 'package:todo_app/views/categories_list_view.dart';
+import 'package:todo_app/views/settings_view.dart';
 
 class CustomPopUpMenu extends StatelessWidget {
-  const CustomPopUpMenu({
-    super.key,
-  });
+  const CustomPopUpMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
+
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(8),
       ),
@@ -21,11 +22,16 @@ class CustomPopUpMenu extends StatelessWidget {
         return [
           PopupMenuItem(
             value: 'task lists',
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.list_alt_outlined, color: kPrimaryColor),
-                SizedBox(width: 10),
-                Text('Task Lists', style: TextStyle(fontSize: 16)),
+                Icon(
+                  Icons.list_alt_outlined,
+                  color: ChangeTheme().theme(context)
+                      ? Colors.white
+                      : kPrimaryColor,
+                ),
+                const SizedBox(width: 10),
+                const Text('Task Lists', style: TextStyle(fontSize: 16)),
               ],
             ),
             onTap: () {
@@ -41,11 +47,13 @@ class CustomPopUpMenu extends StatelessWidget {
           ),
           PopupMenuItem(
             value: 'add new',
-            child: const Row(
+            child:  Row(
               children: [
-                Icon(Icons.add_alarm_outlined, color: kPrimaryColor),
-                SizedBox(width: 10),
-                Text('Add New Task', style: TextStyle(fontSize: 16)),
+                Icon(Icons.add_alarm_outlined, color: ChangeTheme().theme(context)
+                      ? Colors.white
+                      : kPrimaryColor,),
+                const SizedBox(width: 10),
+                const Text('Add New Task', style: TextStyle(fontSize: 16)),
               ],
             ),
             onTap: () {
@@ -61,14 +69,25 @@ class CustomPopUpMenu extends StatelessWidget {
           ),
           PopupMenuItem(
             value: 'settings',
-            child: const Row(
+            child:  Row(
               children: [
-                Icon(Icons.settings_outlined, color: kPrimaryColor),
-                SizedBox(width: 10),
-                Text('Settings', style: TextStyle(fontSize: 16)),
+                Icon(Icons.settings_outlined, color: ChangeTheme().theme(context)
+                      ? Colors.white
+                      : kPrimaryColor,),
+                const SizedBox(width: 10),
+                const Text('Settings', style: TextStyle(fontSize: 16)),
               ],
             ),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return const SettingsView();
+                  },
+                ),
+              );
+            },
           ),
         ];
       },
