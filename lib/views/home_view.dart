@@ -4,6 +4,7 @@ import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
 import 'package:todo_app/helpers/constants.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/categories_list_model.dart';
+import 'package:todo_app/models/general_settings_model.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/views/add_edit_todo_view.dart';
 import 'package:todo_app/widgets/general_widgets/categories_list_drop_down_list.dart';
@@ -25,8 +26,9 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void initState() {
-    BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
     super.initState();
+    BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
+    // Initial load is handled by StreamBuilder
   }
 
   @override
@@ -37,43 +39,60 @@ class _HomeViewState extends State<HomeView> {
           appBar: AppBar(
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: StreamBuilder<List<CategoriesListsModel>>(
-                stream: databaseProvider.readCategoriesListsData(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
+              child: StreamBuilder<List<GeneralSettingsModel>>(
+                stream: databaseProvider.readGeneralSettingsData(),
+                builder: (context, settingsSnapshot) {
+                  if (settingsSnapshot.hasError) {
+                    return Text('Error: ${settingsSnapshot.error}');
                   }
-                  final categories = snapshot.data ?? [];
-                  final dropdownItems = [
-                    {
-                      'value': 'All Lists',
-                      'label': 'All Lists',
-                      'icon': Icons.home,
-                    },
-                    ...categories.map((category) {
-                      return {
-                        'value': category.categoryListValue,
-                        'label': category.categoryListValue,
-                        'icon': Icons.blur_on_outlined,
-                      };
-                    }),
-                    {
-                      'value': 'Finished',
-                      'label': 'Finished',
-                      'icon': Icons.done,
-                    },
-                  ];
-                  selectedCategory ??= dropdownItems.first['value'].toString();
-                  return CustomCategoriesListDropDownList(
-                    initialTextColor: Colors.white,
-                    prefixIconColor: Colors.white,
-                    suffixIconColor: Colors.white,
-                    listsDropdownItems: dropdownItems,
-                    initialSelection: selectedCategory,
-                    onSelected: (value) {
-                      setState(() {
-                        selectedCategory = value;
-                      });
+                  final settings = settingsSnapshot.data?.isNotEmpty == true
+                      ? settingsSnapshot.data!.first
+                      : null;
+                  selectedCategory = settings?.listToShow ?? 'All Lists';
+
+                  return StreamBuilder<List<CategoriesListsModel>>(
+                    stream: databaseProvider.readCategoriesListsData(),
+                    builder: (context, categoriesSnapshot) {
+                      if (categoriesSnapshot.hasError) {
+                        return Text('Error: ${categoriesSnapshot.error}');
+                      }
+                      final categories = categoriesSnapshot.data ?? [];
+                      final dropdownItems = [
+                        {
+                          'value': 'All Lists',
+                          'label': 'All Lists',
+                          'icon': Icons.home,
+                        },
+                        ...categories.map((category) {
+                          return {
+                            'value': category.categoryListValue,
+                            'label': category.categoryListValue,
+                            'icon': Icons.blur_on_outlined,
+                          };
+                        }),
+                        {
+                          'value': 'Finished',
+                          'label': 'Finished',
+                          'icon': Icons.done,
+                        },
+                      ];
+                      // Ensure selectedCategory is valid
+                      if (selectedCategory == null ||
+                          !dropdownItems.any((item) => item['value'] == selectedCategory)) {
+                        selectedCategory = dropdownItems.first['value'].toString();
+                      }
+                      return CustomCategoriesListDropDownList(
+                        initialTextColor: Colors.white,
+                        prefixIconColor: Colors.white,
+                        suffixIconColor: Colors.white,
+                        listsDropdownItems: dropdownItems,
+                        initialSelection: selectedCategory,
+                        onSelected: (value) async {
+                          setState(() {
+                            selectedCategory = value;
+                          });
+                        },
+                      );
                     },
                   );
                 },
@@ -96,18 +115,10 @@ class _HomeViewState extends State<HomeView> {
                 }
                 final notes = snapshot.data ?? [];
                 final filteredNotes = selectedCategory == 'All Lists'
-                    ? notes
-                          .where((note) => note.todoListItem != 'Finished')
-                          .toList()
+                    ? notes.where((note) => note.todoListItem != 'Finished').toList()
                     : selectedCategory == 'Finished'
-                    ? notes
-                          .where((note) => note.todoListItem == 'Finished')
-                          .toList()
-                    : notes
-                          .where(
-                            (note) => note.todoListItem == selectedCategory,
-                          )
-                          .toList();
+                        ? notes.where((note) => note.todoListItem == 'Finished').toList()
+                        : notes.where((note) => note.todoListItem == selectedCategory).toList();
                 if (snapshot.hasData) {
                   return filteredNotes.isNotEmpty
                       ? ListView.builder(
@@ -155,4 +166,3 @@ class _HomeViewState extends State<HomeView> {
     super.dispose();
   }
 }
-

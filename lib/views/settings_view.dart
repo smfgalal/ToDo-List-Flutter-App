@@ -7,6 +7,7 @@ import 'package:todo_app/models/general_settings_model.dart';
 import 'package:todo_app/widgets/general_widgets/custom_snack_bar.dart';
 import 'package:todo_app/widgets/settings_widgets/setting_list_tile_item.dart';
 import 'package:todo_app/widgets/settings_widgets/setting_list_tile_switch.dart';
+import 'package:todo_app/widgets/settings_widgets/show_list_startup_dialog.dart';
 import 'package:todo_app/widgets/settings_widgets/show_weekstart_dialog.dart';
 
 class SettingsView extends StatefulWidget {
@@ -114,7 +115,9 @@ class _SettingsViewState extends State<SettingsView> {
                 SettingsListTileItem(
                   title: 'List to show at startup',
                   subTitle: settings?.listToShow ?? 'All lists',
-                  onTap: () {},
+                  onTap: () {
+                    ShowListToShowDialog().showWeekStartDialog(context);
+                  },
                 ),
                 SettingsListTileItem(
                   title: 'First day of week',

@@ -31,13 +31,28 @@ class _CustomCategoriesListDropDownListState
 
   @override
   void initState() {
+    super.initState();
     selectedValue =
         widget.initialSelection ?? widget.listsDropdownItems.first['value'];
     // Notify parent with initial selection
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.onSelected?.call(selectedValue);
     });
-    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(CustomCategoriesListDropDownList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialSelection != oldWidget.initialSelection) {
+      setState(() {
+        selectedValue =
+            widget.initialSelection ?? widget.listsDropdownItems.first['value'];
+      });
+      // Notify parent with updated selection
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onSelected?.call(selectedValue);
+      });
+    }
   }
 
   @override
