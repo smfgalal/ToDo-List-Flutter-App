@@ -112,6 +112,14 @@ Create database tables
     for (var repeat in defaultRepeats) {
       batch.insert(repeatListTable, {columnRepeatListTitle: repeat});
     }
+    // const List<String> weekStartDays = [
+    //   'Saturday',
+    //   'Sunday',
+    //   'Monday',
+    // ];
+    // for (var day in weekStartDays) {
+    //   batch.insert(generalSettingsTable, {weekStartDay: day});
+    // }
     batch.insert(generalSettingsTable, {
       isDarkTheme: 0,
       listToShowStartup: 'All Lists',

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:todo_app/helpers/change_theme.dart';
 import 'package:todo_app/helpers/constants.dart';
+import 'package:todo_app/main.dart';
 import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/widgets/general_widgets/custom_text_field.dart';
 
@@ -30,13 +31,34 @@ class AddNewToDoDate extends StatefulWidget {
 
 class _AddNewToDoDateState extends State<AddNewToDoDate> {
   DateTime? chosenDate;
+  StartingDayOfWeek? _startingDayOfWeek;
 
   @override
   void initState() {
+    super.initState();
     chosenDate = widget.todoModel != null
         ? DateFormat.yMMMMd().add_jm().parse(widget.todoModel!.toDate)
         : null;
-    super.initState();
+    _loadWeekStart();
+  }
+
+  Future<void> _loadWeekStart() async {
+    final settings = await databaseProvider.fetchCurrentGeneralSettings();
+    setState(() {
+      _startingDayOfWeek = _mapWeekStartToStartingDay(settings?.weekStart);
+    });
+  }
+
+  StartingDayOfWeek _mapWeekStartToStartingDay(String? weekStart) {
+    switch (weekStart?.toLowerCase()) {
+      case 'sunday':
+        return StartingDayOfWeek.sunday;
+      case 'monday':
+        return StartingDayOfWeek.monday;
+      case 'saturday':
+      default:
+        return StartingDayOfWeek.saturday;
+    }
   }
 
   Future<void> _selectDateTime(BuildContext context) async {
@@ -53,7 +75,8 @@ class _AddNewToDoDateState extends State<AddNewToDoDate> {
                 lastDay: DateTime(2050),
                 currentDay: chosenDate ?? DateTime.now(),
                 focusedDay: chosenDate ?? DateTime.now(),
-                startingDayOfWeek: StartingDayOfWeek.saturday,
+                startingDayOfWeek:
+                    _startingDayOfWeek ?? StartingDayOfWeek.saturday,
                 calendarFormat: CalendarFormat.month,
                 onDaySelected: (selectedDay, focusedDay) {
                   Navigator.of(context).pop(selectedDay);

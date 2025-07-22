@@ -126,11 +126,6 @@ class _SettingsViewState extends State<SettingsView> {
                     ShowWeekStartDialog().showWeekStartDialog(context);
                   },
                 ),
-                SettingsListTileItem(
-                  title: 'Time format',
-                  subTitle: settings?.timeFormat ?? '12-hour',
-                  onTap: () {},
-                ),
                 const SizedBox(height: 16),
                 const Text(
                   'Notifications',
