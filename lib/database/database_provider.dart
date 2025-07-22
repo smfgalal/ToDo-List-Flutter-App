@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:todo_app/helpers/todo_model_constants.dart';
 import 'package:todo_app/models/categories_list_model.dart';
+import 'package:todo_app/models/general_settings_model.dart';
 import 'package:todo_app/models/repeat_list_model.dart';
 import 'package:todo_app/models/todo_model.dart';
 
@@ -14,12 +15,16 @@ class DatabaseProvider {
       StreamController<List<CategoriesListsModel>>.broadcast();
   final _repeatListsStreamController =
       StreamController<List<RepeatListsModel>>.broadcast();
+  final _generalSettingStreamController =
+      StreamController<List<GeneralSettingsModel>>.broadcast();
+
   Future<Database?> get db async {
     if (database == null) {
       database = await openDatabasePath();
       await refreshTodos();
       await refreshCategoriesList();
       await refreshRepeatList();
+      await refreshGeneralSettings();
       return database;
     } else {
       return database;
@@ -44,6 +49,11 @@ class DatabaseProvider {
     return todoDb;
   }
 
+  /*
+============================================================
+Create database tables
+============================================================
+*/
   Future<void> _onCreate(Database db) async {
     // await db.execute('DROP TABLE If EXISTS $tableTodo');
     await db.execute('''
@@ -57,19 +67,27 @@ class DatabaseProvider {
         $columnIsFinished BOOLEAN,
         $columnOriginalCategory TEXT)
     ''');
-
     await db.execute('''
-  CREATE TABLE $categoriesListsTable (
-    $columnId INTEGER PRIMARY KEY AUTOINCREMENT, 
-    $columnCategoryListTitle TEXT
-  )
-''');
+      CREATE TABLE $generalSettingsTable (
+        $columnId INTEGER PRIMARY KEY, 
+        $isDarkTheme INTEGER,
+        $listToShowStartup TEXT,
+        $weekStartDay TEXT,
+        $formatTime TEXT
+      )
+    ''');
     await db.execute('''
-  CREATE TABLE $repeatListTable (
-    $columnId INTEGER PRIMARY KEY AUTOINCREMENT, 
-    $columnRepeatListTitle TEXT
-  )
-''');
+      CREATE TABLE $categoriesListsTable (
+        $columnId INTEGER PRIMARY KEY AUTOINCREMENT, 
+        $columnCategoryListTitle TEXT
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE $repeatListTable (
+        $columnId INTEGER PRIMARY KEY AUTOINCREMENT, 
+        $columnRepeatListTitle TEXT
+      )
+    ''');
 
     // Insert default categories
     Batch batch = db.batch();
@@ -94,22 +112,23 @@ class DatabaseProvider {
     for (var repeat in defaultRepeats) {
       batch.insert(repeatListTable, {columnRepeatListTitle: repeat});
     }
+    batch.insert(generalSettingsTable, {
+      isDarkTheme: 0,
+      listToShowStartup: 'All Lists',
+      weekStartDay: 'Saturday',
+      formatTime: '12-hour',
+    });
     await batch.commit(noResult: true);
   }
 
+  /*
+============================================================
+Read and Write All ToDo Notes Data
+============================================================
+*/
   Future<void> refreshTodos() async {
     final todos = await fetchAllTodos();
     _todoStreamController.add(todos);
-  }
-
-  Future<void> refreshCategoriesList() async {
-    final lists = await fetchCategoriesList();
-    _categoriesListsStreamController.add(lists);
-  }
-
-  Future<void> refreshRepeatList() async {
-    final lists = await fetchRepeatList();
-    _repeatListsStreamController.add(lists);
   }
 
   Future<List<TodoModel>> fetchAllTodos() async {
@@ -135,44 +154,8 @@ class DatabaseProvider {
     }
   }
 
-  Future<List<CategoriesListsModel>> fetchCategoriesList() async {
-    try {
-      Database? mydb = await db;
-      var list = await mydb!.query(
-        categoriesListsTable,
-        columns: [columnId, columnCategoryListTitle],
-      );
-
-      return list.map((map) => CategoriesListsModel.fromMap(map)).toList();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<List<RepeatListsModel>> fetchRepeatList() async {
-    try {
-      Database? mydb = await db;
-      var list = await mydb!.query(
-        repeatListTable,
-        columns: [columnId, columnRepeatListTitle],
-      );
-
-      return list.map((map) => RepeatListsModel.fromMap(map)).toList();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Stream<List<TodoModel>> readAllData() {
     return _todoStreamController.stream;
-  }
-
-  Stream<List<CategoriesListsModel>> readCategoriesListsData() {
-    return _categoriesListsStreamController.stream;
-  }
-
-  Stream<List<RepeatListsModel>> readRepeatListsData() {
-    return _repeatListsStreamController.stream;
   }
 
   Future<TodoModel?> readNoteData(int? id) async {
@@ -221,6 +204,95 @@ class DatabaseProvider {
     }
   }
 
+  Future<int> updateData(TodoModel todo) async {
+    try {
+      Database? mydb = await db;
+      int count = await mydb!.update(
+        tableTodo,
+        {
+          columnNote: todo.note,
+          columnDate: todo.toDate,
+          columnCreationDate: todo.creationDate,
+          columnTodoListItem: todo.todoListItem,
+          columnRepeatItem: todo.todoRepeatItem,
+          columnIsFinished: todo.isFinished ?? false ? 1 : 0,
+          columnOriginalCategory: todo.originalCategory,
+        },
+        where: '$columnId = ?',
+        whereArgs: [todo.id],
+      );
+      await refreshTodos();
+      return count;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteNote(int? id) async {
+    try {
+      Database? mydb = await db;
+      await mydb!.delete(
+        tableTodo,
+        where: '$columnId = ?',
+        whereArgs: <Object?>[id],
+      );
+      await refreshTodos();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /*
+============================================================
+Read and Write Categories and Repeat Lists Data
+============================================================
+*/
+  Future<void> refreshCategoriesList() async {
+    final lists = await fetchCategoriesList();
+    _categoriesListsStreamController.add(lists);
+  }
+
+  Future<void> refreshRepeatList() async {
+    final lists = await fetchRepeatList();
+    _repeatListsStreamController.add(lists);
+  }
+
+  Future<List<CategoriesListsModel>> fetchCategoriesList() async {
+    try {
+      Database? mydb = await db;
+      var list = await mydb!.query(
+        categoriesListsTable,
+        columns: [columnId, columnCategoryListTitle],
+      );
+
+      return list.map((map) => CategoriesListsModel.fromMap(map)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<RepeatListsModel>> fetchRepeatList() async {
+    try {
+      Database? mydb = await db;
+      var list = await mydb!.query(
+        repeatListTable,
+        columns: [columnId, columnRepeatListTitle],
+      );
+
+      return list.map((map) => RepeatListsModel.fromMap(map)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Stream<List<CategoriesListsModel>> readCategoriesListsData() {
+    return _categoriesListsStreamController.stream;
+  }
+
+  Stream<List<RepeatListsModel>> readRepeatListsData() {
+    return _repeatListsStreamController.stream;
+  }
+
   Future<int> saveCategoriesListData(CategoriesListsModel categories) async {
     try {
       Database? mydb = await db;
@@ -258,30 +330,6 @@ class DatabaseProvider {
     }
   }
 
-  Future<int> updateData(TodoModel todo) async {
-    try {
-      Database? mydb = await db;
-      int count = await mydb!.update(
-        tableTodo,
-        {
-          columnNote: todo.note,
-          columnDate: todo.toDate,
-          columnCreationDate: todo.creationDate,
-          columnTodoListItem: todo.todoListItem,
-          columnRepeatItem: todo.todoRepeatItem,
-          columnIsFinished: todo.isFinished ?? false ? 1 : 0,
-          columnOriginalCategory: todo.originalCategory,
-        },
-        where: '$columnId = ?',
-        whereArgs: [todo.id],
-      );
-      await refreshTodos();
-      return count;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Future<int> updateCategoryListItem(CategoriesListsModel categoty) async {
     try {
       Database? mydb = await db;
@@ -311,20 +359,6 @@ class DatabaseProvider {
     }
   }
 
-  Future<void> deleteNote(int? id) async {
-    try {
-      Database? mydb = await db;
-      await mydb!.delete(
-        tableTodo,
-        where: '$columnId = ?',
-        whereArgs: <Object?>[id],
-      );
-      await refreshTodos();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Future<void> deleteCategoryListItem(int? id) async {
     try {
       Database? mydb = await db;
@@ -339,10 +373,108 @@ class DatabaseProvider {
     }
   }
 
+  /*
+============================================================
+Read and Write All General Settings Data
+============================================================
+*/
+  Future<void> refreshGeneralSettings() async {
+    final lists = await fetchGeneralSettings();
+    _generalSettingStreamController.add(lists);
+  }
+
+  Stream<List<GeneralSettingsModel>> readGeneralSettingsData() {
+    return _generalSettingStreamController.stream;
+  }
+
+  Future<GeneralSettingsModel?> fetchCurrentGeneralSettings() async {
+    try {
+      Database? mydb = await db;
+      var list = await mydb!.query(
+        generalSettingsTable,
+        columns: [
+          columnId,
+          isDarkTheme,
+          listToShowStartup,
+          weekStartDay,
+          formatTime,
+        ],
+        limit: 1, // Ensure only one record is fetched
+      );
+      if (list.isNotEmpty) {
+        return GeneralSettingsModel.fromMap(list.first);
+      }
+      return null; // Return null if no settings exist
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<GeneralSettingsModel>> fetchGeneralSettings() async {
+    try {
+      Database? mydb = await db;
+      var list = await mydb!.query(
+        generalSettingsTable,
+        columns: [
+          columnId,
+          isDarkTheme,
+          listToShowStartup,
+          weekStartDay,
+          formatTime,
+        ],
+      );
+
+      return list.map((map) => GeneralSettingsModel.fromMap(map)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<int> saveGeneralSettingsData(GeneralSettingsModel settings) async {
+    try {
+      Database? mydb = await db;
+      int id = await mydb!.insert(generalSettingsTable, {
+        columnId: settings.id,
+        isDarkTheme: settings.isDarkMode == true ? 1 : 0,
+        listToShowStartup: settings.listToShow ?? 'All Lists',
+        weekStartDay: settings.weekStart ?? 'Saturday',
+        formatTime: settings.timeFormat ?? '12-hour',
+      });
+      await refreshGeneralSettings();
+      return id;
+    } catch (e) {
+     // print('Error saving general settings: $e');
+      rethrow;
+    }
+  }
+
+  Future<int> updateGeneralSettings(GeneralSettingsModel settings) async {
+    try {
+      Database? mydb = await db;
+      int count = await mydb!.update(
+        generalSettingsTable,
+        {
+          isDarkTheme: settings.isDarkMode == true ? 1 : 0,
+          listToShowStartup: settings.listToShow ?? 'All Lists',
+          weekStartDay: settings.weekStart ?? 'Saturday',
+          formatTime: settings.timeFormat ?? '12-hour',
+        },
+        where: '$columnId = ?',
+        whereArgs: [settings.id],
+      );
+      await refreshGeneralSettings();
+      return count;
+    } catch (e) {
+     // print('Error updating general settings: $e');
+      rethrow;
+    }
+  }
+
   // Close the stream controller when no longer needed
   void dispose() {
     _todoStreamController.close();
     _categoriesListsStreamController.close();
     _repeatListsStreamController.close();
+    _generalSettingStreamController.close();
   }
 }

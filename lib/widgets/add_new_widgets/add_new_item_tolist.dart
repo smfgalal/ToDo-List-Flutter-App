@@ -31,19 +31,14 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
   final _newListController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey();
 
-  
-
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-         const Text(
+        const Text(
           'Repeat task',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
         ),
         StreamBuilder<List<RepeatListsModel>>(
           stream: databaseProvider.readRepeatListsData(),
@@ -70,19 +65,37 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
             );
             if (!isValidRepeat && widget.initialRepeatList != null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
+                CustomSnackBar().snackBarMessage(
+                  context: context,
+                  backGroundColor: ChangeTheme().theme(context)
+                      ? const Color.fromARGB(255, 49, 49, 49)
+                      : const Color.fromARGB(255, 239, 239, 239),
+                  closeIconColor: ChangeTheme().theme(context)
+                      ? Colors.white
+                      : kPrimaryColor,
+                  message:
                       'Repeat option "${widget.initialRepeatList}" no longer exists. Reverted to default.',
-                    ),
-                  ),
+                  messageColor: ChangeTheme().theme(context)
+                      ? Colors.white
+                      : kPrimaryColor,
+                  duration: 2,
+                  showCloseIcon: true,
+                  borderColor: ChangeTheme().theme(context)
+                      ? kPrimaryLightColor
+                      : kPrimaryColor,
                 );
               });
             }
             return CustomRepeatDropDownList(
-              initialTextColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
-              prefixIconColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
-              suffixIconColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+              initialTextColor: ChangeTheme().theme(context)
+                  ? Colors.white
+                  : kPrimaryColor,
+              prefixIconColor: ChangeTheme().theme(context)
+                  ? Colors.white
+                  : kPrimaryColor,
+              suffixIconColor: ChangeTheme().theme(context)
+                  ? Colors.white
+                  : kPrimaryColor,
               listsDropdownItems: dropdownItems.isNotEmpty
                   ? dropdownItems
                   : [
@@ -103,12 +116,9 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
           },
         ),
         const SizedBox(height: 50),
-         const Text(
+        const Text(
           'Task list',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -141,23 +151,37 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     CustomSnackBar().snackBarMessage(
                       context: context,
-                      backGroundColor: const Color.fromARGB(255, 244, 244, 244),
-                      closeIconColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+                      backGroundColor: ChangeTheme().theme(context)
+                          ? const Color.fromARGB(255, 49, 49, 49)
+                          : const Color.fromARGB(255, 239, 239, 239),
+                      closeIconColor: ChangeTheme().theme(context)
+                          ? Colors.white
+                          : kPrimaryColor,
                       message:
                           'Category "${widget.initialCategoriesList}" no longer exists. Reverted to default.',
-                      messageColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+                      messageColor: ChangeTheme().theme(context)
+                          ? Colors.white
+                          : kPrimaryColor,
                       duration: 2,
                       showCloseIcon: true,
-                      borderColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+                      borderColor: ChangeTheme().theme(context)
+                          ? kPrimaryLightColor
+                          : kPrimaryColor,
                     );
                   });
                 }
 
                 return Flexible(
                   child: CustomCategoriesListDropDownList(
-                    initialTextColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
-                    prefixIconColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
-                    suffixIconColor: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
+                    initialTextColor: ChangeTheme().theme(context)
+                        ? Colors.white
+                        : kPrimaryColor,
+                    prefixIconColor: ChangeTheme().theme(context)
+                        ? Colors.white
+                        : kPrimaryColor,
+                    suffixIconColor: ChangeTheme().theme(context)
+                        ? Colors.white
+                        : kPrimaryColor,
                     listsDropdownItems: dropdownItems.isNotEmpty
                         ? dropdownItems
                         : [
@@ -186,16 +210,14 @@ class _AddNewAddToListState extends State<AddNewItemToList> {
                   formKey: formKey,
                 ).showAddNewToListDialog(context);
               },
-              icon:  const Icon(
-                Icons.format_list_bulleted_add,
-                size: 30,
-              ),
+              icon: const Icon(Icons.format_list_bulleted_add, size: 30),
             ),
           ],
         ),
       ],
     );
   }
+
   @override
   void dispose() {
     _newListController.dispose();

@@ -100,6 +100,7 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
                 hintText: 'Date not set',
                 controller: _toDateTextController,
                 icon: const Icon(Icons.calendar_month_rounded),
+                todoModel: _noteId != null ? widget.todoModel! : null,
                 onDateTimeChanged: (dateTime) {
                   setState(() {
                     _selectedToDate = dateTime;

@@ -203,19 +203,20 @@ class _TodoListItemState extends State<TodoListItem> {
                           if (value) {
                             CustomSnackBar().snackBarMessage(
                               context: context,
-                              backGroundColor: const Color.fromARGB(
-                                255,
-                                244,
-                                244,
-                                244,
-                              ),
+                              backGroundColor: ChangeTheme().theme(context)
+                                  ? const Color.fromARGB(255, 49, 49, 49)
+                                  : const Color.fromARGB(255, 239, 239, 239),
                               closeIconColor: kPrimaryColor,
                               message:
                                   '(${widget.todoModel.note}) Task marked as Finished successfully',
-                              messageColor: kPrimaryColor,
+                              messageColor: ChangeTheme().theme(context)
+                                  ? Colors.white
+                                  : kPrimaryColor,
                               duration: 2,
                               showCloseIcon: true,
-                              borderColor: kPrimaryColor,
+                              borderColor: ChangeTheme().theme(context)
+                                  ? kPrimaryLightColor
+                                  : kPrimaryColor,
                             );
                           }
                           setState(() {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:todo_app/helpers/change_theme.dart';
 import 'package:todo_app/helpers/constants.dart';
+import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/widgets/general_widgets/custom_text_field.dart';
 
 class AddNewToDoDate extends StatefulWidget {
@@ -12,6 +14,7 @@ class AddNewToDoDate extends StatefulWidget {
     required this.icon,
     this.onDateTimeChanged,
     this.controller,
+    this.todoModel,
   });
 
   final String title;
@@ -19,6 +22,7 @@ class AddNewToDoDate extends StatefulWidget {
   final Icon icon;
   final ValueChanged<DateTime>? onDateTimeChanged;
   final TextEditingController? controller;
+  final TodoModel? todoModel;
 
   @override
   State<AddNewToDoDate> createState() => _AddNewToDoDateState();
@@ -27,21 +31,83 @@ class AddNewToDoDate extends StatefulWidget {
 class _AddNewToDoDateState extends State<AddNewToDoDate> {
   DateTime? chosenDate;
 
+  @override
+  void initState() {
+    chosenDate = widget.todoModel != null
+        ? DateFormat.yMMMMd().add_jm().parse(widget.todoModel!.toDate)
+        : null;
+    super.initState();
+  }
 
   Future<void> _selectDateTime(BuildContext context) async {
-    // Show DatePicker
-    final selectedDate = await showDatePicker(
+    final selectedDate = await showDialog<DateTime>(
       context: context,
-      switchToInputEntryModeIcon: const Icon(Icons.edit),
-      confirmText: 'Choose',
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2050),
+      builder: (context) => Dialog(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TableCalendar(
+                firstDay: DateTime.now(),
+                lastDay: DateTime(2050),
+                currentDay: chosenDate ?? DateTime.now(),
+                focusedDay: chosenDate ?? DateTime.now(),
+                startingDayOfWeek: StartingDayOfWeek.saturday,
+                calendarFormat: CalendarFormat.month,
+                onDaySelected: (selectedDay, focusedDay) {
+                  Navigator.of(context).pop(selectedDay);
+                },
+                calendarStyle: CalendarStyle(
+                  tableBorder: TableBorder(
+                    bottom: BorderSide(
+                      width: 1,
+                      color: ChangeTheme().theme(context)
+                          ? const Color.fromARGB(255, 85, 85, 85)
+                          : const Color.fromARGB(255, 183, 183, 183),
+                    ),
+                  ),
+                  todayDecoration: BoxDecoration(
+                    color: ChangeTheme().theme(context)
+                        ? kPrimaryLightColor
+                        : kPrimaryColor,
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: ChangeTheme().theme(context)
+                        ? kPrimaryColor
+                        : kPrimaryLightColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                headerStyle: const HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () =>
+                        Navigator.of(context).pop(chosenDate ?? DateTime.now()),
+                    child: const Text('Choose'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
 
-    if (selectedDate != null) {
+    if (selectedDate != null && context.mounted) {
       final selectedTime = await showTimePicker(
-        // ignore: use_build_context_synchronously
         context: context,
         initialTime: TimeOfDay.now(),
         confirmText: 'Confirm',
@@ -75,13 +141,13 @@ class _AddNewToDoDateState extends State<AddNewToDoDate> {
       children: [
         Text(
           widget.title,
-          style:  TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w600,
             color: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
             fontSize: 18,
           ),
         ),
-         const SizedBox(height: 8),
+        const SizedBox(height: 8),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [

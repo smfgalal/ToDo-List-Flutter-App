@@ -10,12 +10,7 @@ late DatabaseProvider databaseProvider;
 
 void main() {
   databaseProvider = DatabaseProvider();
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
-      child: const ToDoListApp(),
-    ),
-  );
+  runApp(const ToDoListApp());
 }
 
 class ToDoListApp extends StatelessWidget {
@@ -23,17 +18,20 @@ class ToDoListApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        return BlocProvider(
-          create: (context) => ReadTodoNotesCubit(),
-          child: MaterialApp(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        BlocProvider(create: (context) => ReadTodoNotesCubit()),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: themeProvider.themeData,
             home: HomeView(),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

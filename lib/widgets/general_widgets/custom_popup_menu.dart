@@ -11,7 +11,6 @@ class CustomPopUpMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
-
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(8),
       ),
@@ -47,11 +46,14 @@ class CustomPopUpMenu extends StatelessWidget {
           ),
           PopupMenuItem(
             value: 'add new',
-            child:  Row(
+            child: Row(
               children: [
-                Icon(Icons.add_alarm_outlined, color: ChangeTheme().theme(context)
+                Icon(
+                  Icons.add_alarm_outlined,
+                  color: ChangeTheme().theme(context)
                       ? Colors.white
-                      : kPrimaryColor,),
+                      : kPrimaryColor,
+                ),
                 const SizedBox(width: 10),
                 const Text('Add New Task', style: TextStyle(fontSize: 16)),
               ],
@@ -69,11 +71,14 @@ class CustomPopUpMenu extends StatelessWidget {
           ),
           PopupMenuItem(
             value: 'settings',
-            child:  Row(
+            child: Row(
               children: [
-                Icon(Icons.settings_outlined, color: ChangeTheme().theme(context)
+                Icon(
+                  Icons.settings_outlined,
+                  color: ChangeTheme().theme(context)
                       ? Colors.white
-                      : kPrimaryColor,),
+                      : kPrimaryColor,
+                ),
                 const SizedBox(width: 10),
                 const Text('Settings', style: TextStyle(fontSize: 16)),
               ],
@@ -83,7 +88,8 @@ class CustomPopUpMenu extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) {
-                    return const SettingsView();
+                    return const SettingsView(
+                    );
                   },
                 ),
               );
