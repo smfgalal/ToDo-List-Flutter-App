@@ -44,7 +44,7 @@ class ThemeProvider extends ChangeNotifier {
         backgroundColor: kPrimaryDarkColor,
         foregroundColor: Colors.white,
       ),
-      scaffoldBackgroundColor: Colors.grey[900],
+      scaffoldBackgroundColor: const Color.fromARGB(255, 23, 23, 23),
       textTheme: const TextTheme(
         bodyMedium: TextStyle(color: Colors.white),
         titleLarge: TextStyle(color: Colors.white),

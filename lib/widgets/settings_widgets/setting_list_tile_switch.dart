@@ -65,6 +65,7 @@ class _SettingListTileWithSwitchState extends State<SettingListTileWithSwitch> {
           Switch(
             trackOutlineWidth: const WidgetStatePropertyAll(2),
             activeTrackColor: widget.switchActiveColor,
+            activeColor: kPrimaryColor,
             value: widget.isChecked!,
             onChanged: widget.onChanged,
           ),

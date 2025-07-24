@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:todo_app/helpers/constants.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/categories_list_model.dart';
+import 'package:todo_app/models/general_settings_model.dart';
+import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/widgets/general_widgets/custom_snack_bar.dart';
 import 'package:todo_app/widgets/general_widgets/custom_text_field.dart';
 
@@ -131,12 +133,44 @@ class ShowAddToListDialog {
             CategoriesListsModel(categoryListValue: result),
           );
         } else {
+          // Update the category
           await databaseProvider.updateCategoryListItem(
             CategoriesListsModel(
               id: categoryModel!.id,
               categoryListValue: result,
             ),
           );
+
+          final todosToUpdate = await databaseProvider.fetchTodosByCategory(
+            categoryModel!.categoryListValue!,
+          );
+          final listToShowToUpdate = await databaseProvider
+              .fetchSettingsByListToShow(categoryModel!.categoryListValue!);
+              
+          for (var todo in todosToUpdate) {
+            final updatedTodo = TodoModel(
+              id: todo.id,
+              note: todo.note,
+              toDate: todo.toDate,
+              creationDate: todo.creationDate,
+              todoListItem: result,
+              todoRepeatItem: todo.todoRepeatItem,
+              originalCategory: result,
+              isFinished: todo.isFinished,
+            );
+            await databaseProvider.updateData(updatedTodo);
+            await databaseProvider.refreshCategoriesList();
+          }
+          for (var listItem in listToShowToUpdate) {
+            final updatedListItem = GeneralSettingsModel(
+              id: listItem.id,
+              isDarkMode: listItem.isDarkMode,
+              listToShow: result,
+              weekStart: listItem.weekStart,
+            );
+            await databaseProvider.updateGeneralSettings(updatedListItem);
+            await databaseProvider.refreshGeneralSettings();
+          }
         }
         onCategoriesListChanged?.call(result);
       } catch (e) {

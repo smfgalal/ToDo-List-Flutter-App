@@ -144,6 +144,13 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
             noteId: _noteId,
             scrollController: widget.scrollController,
           ).saveUpdateTodos();
+          
+          //   NotificationService().showScheduledNotifications(
+          //   id: widget.todoModel!.id,
+          //   title: 'Your task is ready To Do',
+          //   body: widget.todoModel!.note,
+          //   date: _selectedToDate!,
+          // );
         },
         backgroundColor: ChangeTheme().theme(context)
             ? Colors.white

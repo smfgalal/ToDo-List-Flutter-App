@@ -72,8 +72,7 @@ Create database tables
         $columnId INTEGER PRIMARY KEY, 
         $isDarkTheme INTEGER,
         $listToShowStartup TEXT,
-        $weekStartDay TEXT,
-        $formatTime TEXT
+        $weekStartDay TEXT
       )
     ''');
     await db.execute('''
@@ -112,20 +111,11 @@ Create database tables
     for (var repeat in defaultRepeats) {
       batch.insert(repeatListTable, {columnRepeatListTitle: repeat});
     }
-    // const List<String> weekStartDays = [
-    //   'Saturday',
-    //   'Sunday',
-    //   'Monday',
-    // ];
-    // for (var day in weekStartDays) {
-    //   batch.insert(generalSettingsTable, {weekStartDay: day});
-    // }
-    batch.insert(generalSettingsTable, {
-      isDarkTheme: 0,
-      listToShowStartup: 'All Lists',
-      weekStartDay: 'Saturday',
-      formatTime: '12-hour',
-    });
+    // batch.insert(generalSettingsTable, {
+    //   isDarkTheme: 0,
+    //   listToShowStartup: 'All Lists',
+    //   weekStartDay: 'Saturday',
+    // });
     await batch.commit(noResult: true);
   }
 
@@ -245,6 +235,30 @@ Read and Write All ToDo Notes Data
         whereArgs: <Object?>[id],
       );
       await refreshTodos();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<TodoModel>> fetchTodosByCategory(String category) async {
+    try {
+      Database? mydb = await db;
+      var list = await mydb!.query(
+        tableTodo,
+        columns: [
+          columnId,
+          columnNote,
+          columnDate,
+          columnCreationDate,
+          columnTodoListItem,
+          columnRepeatItem,
+          columnIsFinished,
+          columnOriginalCategory,
+        ],
+        where: '$columnOriginalCategory = ?',
+        whereArgs: [category],
+      );
+      return list.map((map) => TodoModel.fromMap(map)).toList();
     } catch (e) {
       rethrow;
     }
@@ -400,13 +414,7 @@ Read and Write All General Settings Data
       Database? mydb = await db;
       var list = await mydb!.query(
         generalSettingsTable,
-        columns: [
-          columnId,
-          isDarkTheme,
-          listToShowStartup,
-          weekStartDay,
-          formatTime,
-        ],
+        columns: [columnId, isDarkTheme, listToShowStartup, weekStartDay],
         limit: 1, // Ensure only one record is fetched
       );
       if (list.isNotEmpty) {
@@ -423,15 +431,26 @@ Read and Write All General Settings Data
       Database? mydb = await db;
       var list = await mydb!.query(
         generalSettingsTable,
-        columns: [
-          columnId,
-          isDarkTheme,
-          listToShowStartup,
-          weekStartDay,
-          formatTime,
-        ],
+        columns: [columnId, isDarkTheme, listToShowStartup, weekStartDay],
       );
 
+      return list.map((map) => GeneralSettingsModel.fromMap(map)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<GeneralSettingsModel>> fetchSettingsByListToShow(
+    String settingList,
+  ) async {
+    try {
+      Database? mydb = await db;
+      var list = await mydb!.query(
+        generalSettingsTable,
+        columns: [columnId, isDarkTheme, listToShowStartup, weekStartDay],
+        where: '$listToShowStartup = ?',
+        whereArgs: [settingList],
+      );
       return list.map((map) => GeneralSettingsModel.fromMap(map)).toList();
     } catch (e) {
       rethrow;
@@ -446,12 +465,11 @@ Read and Write All General Settings Data
         isDarkTheme: settings.isDarkMode == true ? 1 : 0,
         listToShowStartup: settings.listToShow ?? 'All Lists',
         weekStartDay: settings.weekStart ?? 'Saturday',
-        formatTime: settings.timeFormat ?? '12-hour',
       });
       await refreshGeneralSettings();
       return id;
     } catch (e) {
-     // print('Error saving general settings: $e');
+      // print('Error saving general settings: $e');
       rethrow;
     }
   }
@@ -465,7 +483,6 @@ Read and Write All General Settings Data
           isDarkTheme: settings.isDarkMode == true ? 1 : 0,
           listToShowStartup: settings.listToShow ?? 'All Lists',
           weekStartDay: settings.weekStart ?? 'Saturday',
-          formatTime: settings.timeFormat ?? '12-hour',
         },
         where: '$columnId = ?',
         whereArgs: [settings.id],
@@ -473,7 +490,7 @@ Read and Write All General Settings Data
       await refreshGeneralSettings();
       return count;
     } catch (e) {
-     // print('Error updating general settings: $e');
+      // print('Error updating general settings: $e');
       rethrow;
     }
   }

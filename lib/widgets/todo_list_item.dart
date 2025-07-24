@@ -11,9 +11,14 @@ import 'package:todo_app/widgets/general_widgets/custom_check_box.dart';
 import 'package:todo_app/widgets/general_widgets/custom_snack_bar.dart';
 
 class TodoListItem extends StatefulWidget {
-  const TodoListItem({super.key, required this.todoModel});
+  const TodoListItem({
+    super.key,
+    required this.todoModel,
+    this.isAllLists = true,
+  });
 
   final TodoModel todoModel;
+  final bool? isAllLists;
 
   @override
   State<TodoListItem> createState() => _TodoListItemState();
@@ -246,7 +251,7 @@ class _TodoListItemState extends State<TodoListItem> {
                         Text(
                           widget.todoModel.toDate,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: kPrimaryLightColor,
                             fontSize: 14,
                           ),
                         ),
@@ -275,13 +280,26 @@ class _TodoListItemState extends State<TodoListItem> {
                           fontSize: 12,
                         ),
                       ),
-                      Text(
-                        'List: ${widget.todoModel.todoListItem}',
-                        style: const TextStyle(
-                          color: Color.fromARGB(255, 180, 162, 244),
-                          fontSize: 12,
-                        ),
-                      ),
+                      widget.isAllLists!
+                          ? Row(
+                              children: [
+                                const Text(
+                                  'List: ',
+                                  style: TextStyle(
+                                    color: Color.fromARGB(255, 180, 162, 244),
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                Text(
+                                  '${widget.todoModel.todoListItem}',
+                                  style: const TextStyle(
+                                    color: kPrimaryLightColor,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const SizedBox(),
                     ],
                   ),
                 ),

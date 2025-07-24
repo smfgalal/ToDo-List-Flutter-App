@@ -44,7 +44,30 @@ class _ShowListToShowStartupDialogState
         _selectedCategory = settings?.listToShow ?? 'All Lists';
       });
     } catch (e) {
-      print('Error loading current listToShow: $e');
+      CustomSnackBar().snackBarMessage(
+        // ignore: use_build_context_synchronously
+        context: context,
+        backGroundColor:
+            // ignore: use_build_context_synchronously
+            Theme.of(context).brightness == Brightness.dark
+            ? const Color.fromARGB(255, 49, 49, 49)
+            : const Color.fromARGB(255, 239, 239, 239),
+        closeIconColor: kPrimaryColor,
+        message: 'Error loading current listToShow',
+        messageColor:
+            // ignore: use_build_context_synchronously
+            Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : kPrimaryColor,
+        duration: 2,
+        showCloseIcon: true,
+        borderColor:
+            // ignore: use_build_context_synchronously
+            Theme.of(context).brightness == Brightness.dark
+            ? kPrimaryLightColor
+            : kPrimaryColor,
+      );
+      // print('Error loading current listToShow: $e');
     }
   }
 
@@ -148,7 +171,6 @@ class _ShowListToShowStartupDialogState
                                     isDarkMode: settings.isDarkMode,
                                     listToShow: _selectedCategory,
                                     weekStart: settings.weekStart,
-                                    timeFormat: settings.timeFormat,
                                   ),
                                 );
                               } else {
@@ -157,15 +179,17 @@ class _ShowListToShowStartupDialogState
                                     isDarkMode: false,
                                     listToShow: _selectedCategory,
                                     weekStart: 'Saturday',
-                                    timeFormat: '12-hour',
                                   ),
                                 );
                               }
+                              // ignore: use_build_context_synchronously
                               Navigator.pop(context);
                             } catch (e) {
                               CustomSnackBar().snackBarMessage(
+                                // ignore: use_build_context_synchronously
                                 context: context,
                                 backGroundColor:
+                                    // ignore: use_build_context_synchronously
                                     Theme.of(context).brightness ==
                                         Brightness.dark
                                     ? const Color.fromARGB(255, 49, 49, 49)
@@ -173,6 +197,7 @@ class _ShowListToShowStartupDialogState
                                 closeIconColor: kPrimaryColor,
                                 message: 'Failed to save list selection: $e',
                                 messageColor:
+                                    // ignore: use_build_context_synchronously
                                     Theme.of(context).brightness ==
                                         Brightness.dark
                                     ? Colors.white
@@ -180,6 +205,7 @@ class _ShowListToShowStartupDialogState
                                 duration: 2,
                                 showCloseIcon: true,
                                 borderColor:
+                                    // ignore: use_build_context_synchronously
                                     Theme.of(context).brightness ==
                                         Brightness.dark
                                     ? kPrimaryLightColor

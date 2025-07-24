@@ -5,14 +5,12 @@ class GeneralSettingsModel {
   bool? isDarkMode;
   String? listToShow;
   String? weekStart;
-  String? timeFormat;
 
   GeneralSettingsModel({
     this.id,
     this.isDarkMode,
     this.listToShow,
     this.weekStart,
-    this.timeFormat,
   });
 
   factory GeneralSettingsModel.fromMap(dynamic map) {
@@ -21,7 +19,6 @@ class GeneralSettingsModel {
       isDarkMode: (map[isDarkTheme] as int?) == 1,
       listToShow: map[listToShowStartup] as String?,
       weekStart: map[weekStartDay] as String?,
-      timeFormat: map[formatTime] as String?,
     );
   }
 
@@ -31,7 +28,6 @@ class GeneralSettingsModel {
       isDarkTheme: isDarkMode == true ? 1 : 0, // Explicit conversion
       listToShowStartup: listToShow,
       weekStartDay: weekStart,
-      formatTime: timeFormat,
     };
   }
 }

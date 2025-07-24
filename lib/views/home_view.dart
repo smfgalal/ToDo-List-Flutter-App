@@ -9,6 +9,7 @@ import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/views/add_edit_todo_view.dart';
 import 'package:todo_app/widgets/general_widgets/categories_list_drop_down_list.dart';
 import 'package:todo_app/widgets/general_widgets/custom_popup_menu.dart';
+import 'package:todo_app/widgets/general_widgets/no_data_column.dart';
 import 'package:todo_app/widgets/todo_list_item.dart';
 
 class HomeView extends StatefulWidget {
@@ -78,8 +79,11 @@ class _HomeViewState extends State<HomeView> {
                       ];
                       // Ensure selectedCategory is valid
                       if (selectedCategory == null ||
-                          !dropdownItems.any((item) => item['value'] == selectedCategory)) {
-                        selectedCategory = dropdownItems.first['value'].toString();
+                          !dropdownItems.any(
+                            (item) => item['value'] == selectedCategory,
+                          )) {
+                        selectedCategory = dropdownItems.first['value']
+                            .toString();
                       }
                       return CustomCategoriesListDropDownList(
                         initialTextColor: Colors.white,
@@ -100,7 +104,12 @@ class _HomeViewState extends State<HomeView> {
             ),
             leadingWidth: MediaQuery.of(context).size.width / 1.8,
             actions: [
-              IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+              IconButton(
+                onPressed: () {
+                  
+                },
+                icon: const Icon(Icons.search),
+              ),
               const CustomPopUpMenu(),
             ],
             toolbarHeight: 75,
@@ -115,22 +124,35 @@ class _HomeViewState extends State<HomeView> {
                 }
                 final notes = snapshot.data ?? [];
                 final filteredNotes = selectedCategory == 'All Lists'
-                    ? notes.where((note) => note.todoListItem != 'Finished').toList()
+                    ? notes
+                          .where((note) => note.todoListItem != 'Finished')
+                          .toList()
                     : selectedCategory == 'Finished'
-                        ? notes.where((note) => note.todoListItem == 'Finished').toList()
-                        : notes.where((note) => note.todoListItem == selectedCategory).toList();
+                    ? notes
+                          .where((note) => note.todoListItem == 'Finished')
+                          .toList()
+                    : notes
+                          .where(
+                            (note) => note.todoListItem == selectedCategory,
+                          )
+                          .toList();
                 if (snapshot.hasData) {
                   return filteredNotes.isNotEmpty
                       ? ListView.builder(
                           itemCount: filteredNotes.length,
                           controller: widget.getScrollController,
+                          reverse: true,
+                          shrinkWrap: true,
                           itemBuilder: (context, index) {
                             return TodoListItem(
                               todoModel: filteredNotes[index],
+                              isAllLists: selectedCategory == 'All Lists'
+                                  ? true
+                                  : false,
                             );
                           },
                         )
-                      : const Center(child: Text('There are no data to show!'));
+                      : const NoDataColumn();
                 } else {
                   return const Center(child: CircularProgressIndicator());
                 }

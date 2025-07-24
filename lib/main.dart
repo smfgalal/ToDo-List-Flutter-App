@@ -4,12 +4,16 @@ import 'package:provider/provider.dart';
 import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
 import 'package:todo_app/database/database_provider.dart';
 import 'package:todo_app/helpers/change_theme.dart';
+import 'package:todo_app/services/notification_service.dart';
 import 'package:todo_app/views/home_view.dart';
 
 late DatabaseProvider databaseProvider;
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  NotificationService().initNotification();
   databaseProvider = DatabaseProvider();
+
   runApp(const ToDoListApp());
 }
 

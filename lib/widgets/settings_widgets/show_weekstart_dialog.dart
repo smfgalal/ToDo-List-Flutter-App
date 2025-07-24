@@ -111,7 +111,6 @@ class _ShowStartOfWeekDialogState extends State<ShowStartOfWeekDialog> {
                               isDarkMode: settings.isDarkMode,
                               listToShow: settings.listToShow,
                               weekStart: _startDay!.name,
-                              timeFormat: settings.timeFormat,
                             ),
                           );
                         } else {
@@ -120,15 +119,17 @@ class _ShowStartOfWeekDialogState extends State<ShowStartOfWeekDialog> {
                               isDarkMode: false,
                               listToShow: 'All Lists',
                               weekStart: _startDay!.name,
-                              timeFormat: '12-hour',
                             ),
                           );
                         }
+                        // ignore: use_build_context_synchronously
                         Navigator.pop(context);
                       } catch (e) {
                         CustomSnackBar().snackBarMessage(
+                          // ignore: use_build_context_synchronously
                           context: context,
                           backGroundColor:
+                              // ignore: use_build_context_synchronously
                               Theme.of(context).brightness == Brightness.dark
                               ? const Color.fromARGB(255, 49, 49, 49)
                               : const Color.fromARGB(255, 239, 239, 239),
@@ -136,12 +137,14 @@ class _ShowStartOfWeekDialogState extends State<ShowStartOfWeekDialog> {
                           message:
                               'Failed to save Week start day selection: $e',
                           messageColor:
+                              // ignore: use_build_context_synchronously
                               Theme.of(context).brightness == Brightness.dark
                               ? Colors.white
                               : kPrimaryColor,
                           duration: 2,
                           showCloseIcon: true,
                           borderColor:
+                              // ignore: use_build_context_synchronously
                               Theme.of(context).brightness == Brightness.dark
                               ? kPrimaryLightColor
                               : kPrimaryColor,

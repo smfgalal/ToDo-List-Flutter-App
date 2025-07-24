@@ -74,7 +74,6 @@ class _SettingsViewState extends State<SettingsView> {
                             isDarkMode: value,
                             listToShow: settings.listToShow,
                             weekStart: settings.weekStart,
-                            timeFormat: settings.timeFormat,
                           ),
                         );
                       } else {
@@ -83,7 +82,6 @@ class _SettingsViewState extends State<SettingsView> {
                             isDarkMode: value,
                             listToShow: 'All Lists',
                             weekStart: 'Saturday',
-                            timeFormat: '12-hour',
                           ),
                         );
                       }
@@ -121,7 +119,7 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
                 SettingsListTileItem(
                   title: 'First day of week',
-                  subTitle: settings?.weekStart ?? 'Saturday',
+                  subTitle: settings?.weekStart ?? WeekStartDays.saturday.name,
                   onTap: () {
                     ShowWeekStartDialog().showWeekStartDialog(context);
                   },
