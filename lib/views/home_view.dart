@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
 import 'package:todo_app/helpers/constants.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/categories_list_model.dart';
 import 'package:todo_app/models/general_settings_model.dart';
 import 'package:todo_app/models/todo_model.dart';
-import 'package:todo_app/services/notification_service.dart';
+import 'package:todo_app/services/handle_notifications.dart';
 import 'package:todo_app/views/add_edit_todo_view.dart';
 import 'package:todo_app/widgets/general_widgets/categories_list_drop_down_list.dart';
 import 'package:todo_app/widgets/general_widgets/custom_popup_menu.dart';
@@ -31,32 +30,14 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     super.initState();
     BlocProvider.of<ReadTodoNotesCubit>(context).fetchAllNotes();
-    onTapNotification();
-  }
-
-  void onTapNotification() {
-    NotificationService.streamController.stream.listen((response) async {
-      if (response.payload != null) {
-        final noteId = int.tryParse(response.payload!);
-        if (noteId != null) {
-          // Fetch the specific note from the database
-          final note = await databaseProvider.getNoteById(noteId);
-          if (note != null && context.mounted) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return AddEditToDoView(
-                    todoModel: note,
-                    scrollController: widget.getScrollController,
-                  );
-                },
-              ),
-            );
-          }
-        }
-      }
-    });
+    HandleNotifications(
+      widget.getScrollController,
+      context: context,
+    ).rescheduleActiveNotifications();
+    HandleNotifications(
+      widget.getScrollController,
+      context: context,
+    ).onTapNotification();
   }
 
   @override
@@ -159,26 +140,6 @@ class _HomeViewState extends State<HomeView> {
                           )
                           .toList();
                 if (snapshot.hasData) {
-                  // Schedule notifications only for non-finished notes with valid dates
-                  for (var note in filteredNotes) {
-                    if (note.toDate.isNotEmpty && !(note.isFinished ?? false)) {
-                      try {
-                        final parsedToDate = DateFormat.yMMMMd().add_jm().parse(
-                          note.toDate,
-                        );
-                        NotificationService().showScheduledNotifications(
-                          id: note.id!,
-                          title: note.note,
-                          body: 'Your task is ready To Do',
-                          date: parsedToDate,
-                        );
-                      } catch (e) {
-                        debugPrint(
-                          'Error parsing toDate for note ${note.id}: $e',
-                        );
-                      }
-                    }
-                  }
                   return filteredNotes.isNotEmpty
                       ? ListView.builder(
                           itemCount: filteredNotes.length,

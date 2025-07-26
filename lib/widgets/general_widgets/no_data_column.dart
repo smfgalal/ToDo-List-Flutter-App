@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/helpers/change_theme.dart';
 import 'package:todo_app/helpers/constants.dart';
 
 class NoDataColumn extends StatelessWidget {
@@ -17,9 +18,11 @@ class NoDataColumn extends StatelessWidget {
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 241, 241, 241),
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: ChangeTheme().theme(context)
+                  ? const Color.fromARGB(255, 37, 37, 37)
+                  : const Color.fromARGB(255, 241, 241, 241),
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(8),
                 topRight: Radius.circular(8),
               ),
@@ -35,9 +38,11 @@ class NoDataColumn extends StatelessWidget {
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 241, 241, 241),
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: ChangeTheme().theme(context)
+                  ? const Color.fromARGB(255, 37, 37, 37)
+                  : const Color.fromARGB(255, 241, 241, 241),
+              borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(8),
                 bottomRight: Radius.circular(8),
               ),

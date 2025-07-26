@@ -9,9 +9,13 @@ import 'package:todo_app/views/home_view.dart';
 
 late DatabaseProvider databaseProvider;
 
-void main() {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  NotificationService().initNotification();
+  try {
+    await NotificationService().initNotification();
+  } catch (e, stack) {
+    debugPrint('Error initializing notifications in main: $e\n$stack');
+  }
   databaseProvider = DatabaseProvider();
 
   runApp(const ToDoListApp());

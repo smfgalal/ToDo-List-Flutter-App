@@ -7,6 +7,7 @@ import 'package:todo_app/models/categories_list_model.dart';
 import 'package:todo_app/models/general_settings_model.dart';
 import 'package:todo_app/models/repeat_list_model.dart';
 import 'package:todo_app/models/todo_model.dart';
+import 'package:todo_app/services/notification_service.dart';
 
 class DatabaseProvider {
   static Database? database;
@@ -247,6 +248,7 @@ Read and Write All ToDo Notes Data
   Future<void> deleteNote(int? id) async {
     try {
       Database? mydb = await db;
+      await NotificationService().cancelNotifications(id!);
       await mydb!.delete(
         tableTodo,
         where: '$columnId = ?',
