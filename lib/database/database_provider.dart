@@ -226,6 +226,24 @@ Read and Write All ToDo Notes Data
     }
   }
 
+  Future<TodoModel?> getNoteById(int id) async {
+    try {
+      Database? mydb = await db;
+      final maps = await mydb!.query(
+        tableTodo,
+        where: '$columnId = ?',
+        whereArgs: [id],
+      );
+      if (maps.isNotEmpty) {
+        return TodoModel.fromMap(maps.first);
+      }
+      await refreshTodos();
+      return null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> deleteNote(int? id) async {
     try {
       Database? mydb = await db;

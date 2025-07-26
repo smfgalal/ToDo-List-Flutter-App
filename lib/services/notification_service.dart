@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -5,25 +7,27 @@ import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
   final notificationPlugin = FlutterLocalNotificationsPlugin();
-  final bool _isInitialized = false;
-  bool get isInitialized => _isInitialized;
+  static StreamController<NotificationResponse> streamController =
+      StreamController.broadcast();
+
+  static void onTap(NotificationResponse response) {
+    streamController.add(response);
+  }
 
   //========================================
-  //Initializing Notifications
+  // Initializing Notifications
   //========================================
   Future<void> initNotification() async {
-    if (_isInitialized) return; // Prevent re-initialization
-
     tz.initializeTimeZones();
     final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(currentTimeZone));
 
-    //Prepare Android init settings
+    // Prepare Android init settings
     const initSettingsAndroid = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
 
-    //Prepare Ios init settings
+    // Prepare iOS init settings
     const initSettingsIos = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -36,16 +40,16 @@ class NotificationService {
       iOS: initSettingsIos,
     );
 
-    // Finally Initialize the plugin
+    // Initialize the plugin
     await notificationPlugin.initialize(
       initSettings,
-      // onDidReceiveNotificationResponse: (details) {},
-      // onDidReceiveBackgroundNotificationResponse: (details) {},
+      onDidReceiveNotificationResponse: onTap,
+      onDidReceiveBackgroundNotificationResponse: onTap,
     );
   }
 
   //========================================
-  //Notifications details Setup
+  // Notifications details Setup
   //========================================
   NotificationDetails notificationsDetails() {
     return const NotificationDetails(
@@ -61,7 +65,7 @@ class NotificationService {
   }
 
   //========================================
-  //Show Notifications
+  // Show Notifications
   //========================================
   Future<void> showNotifications({
     required int id,
@@ -72,7 +76,7 @@ class NotificationService {
   }
 
   //========================================
-  //Show Repeated Daily Notifications
+  // Show Repeated Daily Notifications
   //========================================
   Future<void> showRepeatedDailyNotifications({
     required int id,
@@ -90,35 +94,45 @@ class NotificationService {
   }
 
   //========================================
-  //Show Scheduled Notifications
+  // Show Scheduled Notifications
   //========================================
   Future<void> showScheduledNotifications({
-    int? id,
-  String? title,
-     String? body,
-     DateTime? date,
+    required int id,
+    String? title,
+    String? body,
+    required DateTime date,
   }) async {
-    // final now = tz.TZDateTime.now(tz.local);
     var scheduledDate = tz.TZDateTime(
       tz.local,
-      date!.year,
+      date.year,
       date.month,
       date.day,
       date.hour,
       date.minute,
     );
+
+    // Ensure the scheduled date is in the future
+    if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
     return notificationPlugin.zonedSchedule(
-      id!,
+      id,
       title,
       body,
       scheduledDate,
       notificationsDetails(),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
+      payload: id.toString(), // Store note ID in payload
     );
   }
 
-  Future<void> cancelNotifications() async {
+  Future<void> cancelAllNotifications() async {
     await notificationPlugin.cancelAll();
+  }
+
+  Future<void> cancelNotifications(int id) async {
+    await notificationPlugin.cancel(id);
   }
 }

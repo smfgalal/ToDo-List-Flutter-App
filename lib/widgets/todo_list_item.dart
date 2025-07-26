@@ -5,6 +5,7 @@ import 'package:todo_app/helpers/change_theme.dart';
 import 'package:todo_app/helpers/constants.dart';
 import 'package:todo_app/main.dart';
 import 'package:todo_app/models/todo_model.dart';
+import 'package:todo_app/services/notification_service.dart';
 import 'package:todo_app/views/add_edit_todo_view.dart';
 import 'package:todo_app/widgets/general_widgets/confirmation_dialog_message.dart';
 import 'package:todo_app/widgets/general_widgets/custom_check_box.dart';
@@ -35,6 +36,7 @@ class _TodoListItemState extends State<TodoListItem> {
   void initState() {
     isChecked = widget.todoModel.isFinished ?? false;
     originalCategory = widget.todoModel.originalCategory ?? 'Default';
+
     super.initState();
   }
 
@@ -206,6 +208,9 @@ class _TodoListItemState extends State<TodoListItem> {
                             context,
                           ).fetchAllNotes();
                           if (value) {
+                            NotificationService().cancelNotifications(
+                              widget.todoModel.id!,
+                            );
                             CustomSnackBar().snackBarMessage(
                               context: context,
                               backGroundColor: ChangeTheme().theme(context)
@@ -227,6 +232,9 @@ class _TodoListItemState extends State<TodoListItem> {
                           setState(() {
                             isSliding = false;
                           });
+                          // NotificationService().cancelNotifications(
+                          //   widget.todoModel.id!,
+                          // );
                         }
                       }
                     },
@@ -273,12 +281,23 @@ class _TodoListItemState extends State<TodoListItem> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Text(
-                        'Creation Date: ${widget.todoModel.creationDate}',
-                        style: const TextStyle(
-                          color: Color.fromARGB(255, 180, 162, 244),
-                          fontSize: 12,
-                        ),
+                      Row(
+                        children: [
+                          const Text(
+                            'last modified: ',
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 178, 178, 178),
+                              fontSize: 11,
+                            ),
+                          ),
+                          Text(
+                            widget.todoModel.creationDate,
+                            style: const TextStyle(
+                              color: Color.fromARGB(255, 180, 162, 244),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
                       widget.isAllLists!
                           ? Row(

@@ -130,7 +130,7 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async {
           SaveUpdateTodo(
             key: formKey,
             todoModel: widget.todoModel,
@@ -144,13 +144,6 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
             noteId: _noteId,
             scrollController: widget.scrollController,
           ).saveUpdateTodos();
-          
-          //   NotificationService().showScheduledNotifications(
-          //   id: widget.todoModel!.id,
-          //   title: 'Your task is ready To Do',
-          //   body: widget.todoModel!.note,
-          //   date: _selectedToDate!,
-          // );
         },
         backgroundColor: ChangeTheme().theme(context)
             ? Colors.white

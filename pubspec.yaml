@@ -42,6 +42,7 @@ dependencies:
   flutter_local_notifications: ^19.3.1
   timezone: ^0.10.1
   flutter_timezone: ^4.1.1
+  flutter_ringtone_manager: ^1.1.2
 
 dev_dependencies:
   flutter_lints: ^6.0.0

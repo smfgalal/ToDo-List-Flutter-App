@@ -72,19 +72,20 @@ class SaveUpdateTodo {
             scrollController!.hasClients &&
             noteId == null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            final targetOffset =
-                scrollController!.position.maxScrollExtent +
-                130;
+            final targetOffset = scrollController!.position.minScrollExtent;
             scrollController!.animateTo(
               targetOffset,
-              duration: const Duration(seconds: 1),
+              duration: const Duration(milliseconds: 500),
               curve: Curves.easeInOut,
             );
           });
         }
       } catch (e) {
         // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error saving todo: $e')));
+        ScaffoldMessenger.of(
+          // ignore: use_build_context_synchronously
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving todo: $e')));
       }
     }
   }
