@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
 import 'package:todo_app/helpers/constants.dart';
+import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/services/handle_notifications.dart';
 import 'package:todo_app/views/add_edit_todo_view.dart';
 import 'package:todo_app/widgets/general_widgets/custom_popup_menu.dart';
@@ -25,6 +26,7 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   String? selectedCategory;
   String searchQuery = '';
+  List<TodoModel> filteredNotes = [];
 
   @override
   void initState() {
@@ -38,12 +40,34 @@ class _HomeViewState extends State<HomeView> {
       widget.getScrollController,
       context: context,
     ).onTapNotification();
-    // Listen to search controller changes
     widget.getSearchController.addListener(() {
       setState(() {
         searchQuery = widget.getSearchController.text.trim();
       });
     });
+  }
+
+  // Callback to reset search query
+  void resetSearchQuery() {
+    setState(() {
+      searchQuery = '';
+      widget.getSearchController.clear();
+    });
+  }
+
+  // Callback to update filtered notes
+  void updateFilteredNotes(List<TodoModel> notes) {
+    // Only update if the filtered notes have changed
+    if (filteredNotes.length != notes.length ||
+        !filteredNotes.every((note) => notes.contains(note))) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            filteredNotes = notes;
+          });
+        }
+      });
+    }
   }
 
   @override
@@ -56,9 +80,12 @@ class _HomeViewState extends State<HomeView> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: MainCategoriesDropDownList().mainCategoriesDropDownList(
                 selectedCategory,
-                (value) async {
+                (value) {
                   setState(() {
                     selectedCategory = value;
+                    if (searchQuery.isNotEmpty) {
+                      resetSearchQuery();
+                    }
                   });
                 },
               ),
@@ -72,6 +99,12 @@ class _HomeViewState extends State<HomeView> {
                     searchQuery = value.trim();
                   });
                 },
+                onCancel: () {
+                  if (filteredNotes.isEmpty) {
+                    resetSearchQuery();
+                  }
+                },
+                filteredNotes: filteredNotes,
               ),
               const CustomPopUpMenu(),
             ],
@@ -81,6 +114,7 @@ class _HomeViewState extends State<HomeView> {
             selectedCategory: selectedCategory,
             searchQuery: searchQuery,
             widget: widget,
+            onFilteredNotesUpdated: updateFilteredNotes,
           ),
           floatingActionButton: FloatingActionButton(
             backgroundColor: kPrimaryLightColor,
@@ -108,7 +142,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   void dispose() {
     widget.scrollController.dispose();
-    widget.searchController.dispose(); // Dispose search controller
+    widget.searchController.dispose();
     super.dispose();
   }
 }

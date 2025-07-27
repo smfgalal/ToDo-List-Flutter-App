@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/helpers/change_theme.dart';
 import 'package:todo_app/helpers/constants.dart';
+import 'package:todo_app/models/todo_model.dart';
 
 class SearchTasksBar extends StatelessWidget {
-  const SearchTasksBar({super.key, this.searchBarController, this.onChanged});
+  const SearchTasksBar({
+    super.key,
+    this.searchBarController,
+    this.onChanged,
+    this.onCancel,
+    this.filteredNotes,
+  });
 
   final TextEditingController? searchBarController;
   final Function(String)? onChanged;
+  final VoidCallback? onCancel;
+  final List<TodoModel>? filteredNotes;
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +24,7 @@ class SearchTasksBar extends StatelessWidget {
       color: Colors.transparent,
       position: PopupMenuPosition.under,
       icon: const Icon(Icons.search),
+      onCanceled: onCancel,
       itemBuilder: (context) {
         return [
           PopupMenuItem(
@@ -32,7 +42,7 @@ class SearchTasksBar extends StatelessWidget {
                     ? Colors.white
                     : kPrimaryColor,
               ),
-              onChanged: onChanged, // Ensure onChanged is called
+              onChanged: onChanged,
             ),
           ),
         ];

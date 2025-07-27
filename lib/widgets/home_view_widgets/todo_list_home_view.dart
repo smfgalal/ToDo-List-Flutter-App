@@ -11,11 +11,13 @@ class TasksListHomeView extends StatelessWidget {
     required this.selectedCategory,
     required this.searchQuery,
     required this.widget,
+    required this.onFilteredNotesUpdated,
   });
 
   final String? selectedCategory;
   final String searchQuery;
   final HomeView widget;
+  final Function(List<TodoModel>) onFilteredNotesUpdated;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,7 @@ class TasksListHomeView extends StatelessWidget {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
           final notes = snapshot.data ?? [];
-
+          // Apply category and search filtering
           final filteredNotes = notes.where((note) {
             // Category filtering
             bool matchesCategory = selectedCategory == 'All Lists'
@@ -42,6 +44,10 @@ class TasksListHomeView extends StatelessWidget {
                 note.note.toLowerCase().contains(searchQuery.toLowerCase());
             return matchesCategory && matchesSearch;
           }).toList();
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            onFilteredNotesUpdated(filteredNotes);
+          });
 
           if (snapshot.hasData) {
             return filteredNotes.isNotEmpty
