@@ -76,7 +76,6 @@ class _AddEditToDoViewState extends State<AddEditToDoView> {
               AddNewToDoText(
                 title: 'What is to be done?',
                 hintText: 'Enter Task Here',
-                icon: const Icon(Icons.mic),
                 textController: _noteTextController,
               ),
               _noteId != null

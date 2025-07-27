@@ -283,6 +283,29 @@ Read and Write All ToDo Notes Data
       rethrow;
     }
   }
+  Future<List<TodoModel>> fetchTodosByNote(String note) async {
+    try {
+      Database? mydb = await db;
+      var list = await mydb!.query(
+        tableTodo,
+        columns: [
+          columnId,
+          columnNote,
+          columnDate,
+          columnCreationDate,
+          columnTodoListItem,
+          columnRepeatItem,
+          columnIsFinished,
+          columnOriginalCategory,
+        ],
+        where: '$columnNote = ?',
+        whereArgs: [note],
+      );
+      return list.map((map) => TodoModel.fromMap(map)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   /*
 ============================================================

@@ -8,49 +8,41 @@ class AddNewToDoText extends StatelessWidget {
     super.key,
     required this.title,
     this.hintText = '',
-    required this.icon, this.textController,
+    this.textController,
   });
 
   final String title;
   final String hintText;
-  final Icon icon;
   final TextEditingController? textController;
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style:  TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
             color: ChangeTheme().theme(context) ? Colors.white : kPrimaryColor,
           ),
         ),
         const SizedBox(height: 8),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: MediaQuery.of(context).size.width / 1.3,
-              child: CustomTextField(
-                hintText: hintText,
-                minLines: 1,
-                maxLines: 5,
-                textController: textController,
-                validator: (data) {
-                  if (data!.isEmpty) {
-                    return 'Task field is required.';
-                  }
-                  return null;
-                },
-              ),
-            ),
-            IconButton(onPressed: () {}, icon: icon),
-          ],
+        SizedBox(
+          width: MediaQuery.of(context).size.width / 1.2,
+          child: CustomTextField(
+            hintText: hintText,
+            minLines: 1,
+            maxLines: 5,
+            textController: textController,
+            validator: (data) {
+              if (data!.isEmpty) {
+                return 'Task field is required.';
+              }
+              return null;
+            },
+          ),
         ),
       ],
     );

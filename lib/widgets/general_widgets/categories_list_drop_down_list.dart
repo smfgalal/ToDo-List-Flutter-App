@@ -42,7 +42,7 @@ class _CustomCategoriesListDropDownListState
 
   @override
   void didUpdateWidget(CustomCategoriesListDropDownList oldWidget) {
-    super.didUpdateWidget(oldWidget);
+    super.didUpdateWidget(oldWidget); 
     if (widget.initialSelection != oldWidget.initialSelection) {
       setState(() {
         selectedValue =

@@ -2,16 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_app/cubits/read_cubit/read_todo_notes_cubit.dart';
 import 'package:todo_app/helpers/constants.dart';
-import 'package:todo_app/main.dart';
-import 'package:todo_app/models/categories_list_model.dart';
-import 'package:todo_app/models/general_settings_model.dart';
-import 'package:todo_app/models/todo_model.dart';
 import 'package:todo_app/services/handle_notifications.dart';
 import 'package:todo_app/views/add_edit_todo_view.dart';
-import 'package:todo_app/widgets/general_widgets/categories_list_drop_down_list.dart';
 import 'package:todo_app/widgets/general_widgets/custom_popup_menu.dart';
-import 'package:todo_app/widgets/general_widgets/no_data_column.dart';
-import 'package:todo_app/widgets/todo_list_item.dart';
+import 'package:todo_app/widgets/home_view_widgets/main_categories_dropdown_list.dart';
+import 'package:todo_app/widgets/home_view_widgets/search_tasks_bar.dart';
+import 'package:todo_app/widgets/home_view_widgets/todo_list_home_view.dart';
 
 class HomeView extends StatefulWidget {
   HomeView({super.key});
@@ -19,12 +15,16 @@ class HomeView extends StatefulWidget {
   final ScrollController scrollController = ScrollController();
   ScrollController get getScrollController => scrollController;
 
+  final TextEditingController searchController = TextEditingController();
+  TextEditingController get getSearchController => searchController;
+
   @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
   String? selectedCategory;
+  String searchQuery = '';
 
   @override
   void initState() {
@@ -38,6 +38,12 @@ class _HomeViewState extends State<HomeView> {
       widget.getScrollController,
       context: context,
     ).onTapNotification();
+    // Listen to search controller changes
+    widget.getSearchController.addListener(() {
+      setState(() {
+        searchQuery = widget.getSearchController.text.trim();
+      });
+    });
   }
 
   @override
@@ -48,119 +54,33 @@ class _HomeViewState extends State<HomeView> {
           appBar: AppBar(
             leading: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: StreamBuilder<List<GeneralSettingsModel>>(
-                stream: databaseProvider.readGeneralSettingsData(),
-                builder: (context, settingsSnapshot) {
-                  if (settingsSnapshot.hasError) {
-                    return Text('Error: ${settingsSnapshot.error}');
-                  }
-                  final settings = settingsSnapshot.data?.isNotEmpty == true
-                      ? settingsSnapshot.data!.first
-                      : null;
-                  selectedCategory = settings?.listToShow ?? 'All Lists';
-
-                  return StreamBuilder<List<CategoriesListsModel>>(
-                    stream: databaseProvider.readCategoriesListsData(),
-                    builder: (context, categoriesSnapshot) {
-                      if (categoriesSnapshot.hasError) {
-                        return Text('Error: ${categoriesSnapshot.error}');
-                      }
-                      final categories = categoriesSnapshot.data ?? [];
-                      final dropdownItems = [
-                        {
-                          'value': 'All Lists',
-                          'label': 'All Lists',
-                          'icon': Icons.home,
-                        },
-                        ...categories.map((category) {
-                          return {
-                            'value': category.categoryListValue,
-                            'label': category.categoryListValue,
-                            'icon': Icons.blur_on_outlined,
-                          };
-                        }),
-                        {
-                          'value': 'Finished',
-                          'label': 'Finished',
-                          'icon': Icons.done,
-                        },
-                      ];
-                      // Ensure selectedCategory is valid
-                      if (selectedCategory == null ||
-                          !dropdownItems.any(
-                            (item) => item['value'] == selectedCategory,
-                          )) {
-                        selectedCategory = dropdownItems.first['value']
-                            .toString();
-                      }
-                      return CustomCategoriesListDropDownList(
-                        initialTextColor: Colors.white,
-                        prefixIconColor: Colors.white,
-                        suffixIconColor: Colors.white,
-                        listsDropdownItems: dropdownItems,
-                        initialSelection: selectedCategory,
-                        onSelected: (value) async {
-                          setState(() {
-                            selectedCategory = value;
-                          });
-                        },
-                      );
-                    },
-                  );
+              child: MainCategoriesDropDownList().mainCategoriesDropDownList(
+                selectedCategory,
+                (value) async {
+                  setState(() {
+                    selectedCategory = value;
+                  });
                 },
               ),
             ),
-            leadingWidth: MediaQuery.of(context).size.width / 1.8,
+            leadingWidth: MediaQuery.of(context).size.width / 1.3,
             actions: [
-              IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+              SearchTasksBar(
+                searchBarController: widget.getSearchController,
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value.trim();
+                  });
+                },
+              ),
               const CustomPopUpMenu(),
             ],
             toolbarHeight: 75,
           ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: StreamBuilder<List<TodoModel>>(
-              stream: databaseProvider.readAllData(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-                final notes = snapshot.data ?? [];
-                final filteredNotes = selectedCategory == 'All Lists'
-                    ? notes
-                          .where((note) => note.todoListItem != 'Finished')
-                          .toList()
-                    : selectedCategory == 'Finished'
-                    ? notes
-                          .where((note) => note.todoListItem == 'Finished')
-                          .toList()
-                    : notes
-                          .where(
-                            (note) => note.todoListItem == selectedCategory,
-                          )
-                          .toList();
-                if (snapshot.hasData) {
-                  return filteredNotes.isNotEmpty
-                      ? ListView.builder(
-                          itemCount: filteredNotes.length,
-                          controller: widget.getScrollController,
-                          shrinkWrap: true,
-                          itemBuilder: (context, index) {
-                            final note = filteredNotes.reversed.toList()[index];
-                            return TodoListItem(
-                              todoModel: note,
-                              isAllLists: selectedCategory == 'All Lists'
-                                  ? true
-                                  : false,
-                            );
-                          },
-                        )
-                      : const NoDataColumn();
-                } else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              },
-            ),
+          body: TasksListHomeView(
+            selectedCategory: selectedCategory,
+            searchQuery: searchQuery,
+            widget: widget,
           ),
           floatingActionButton: FloatingActionButton(
             backgroundColor: kPrimaryLightColor,
@@ -188,6 +108,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   void dispose() {
     widget.scrollController.dispose();
+    widget.searchController.dispose(); // Dispose search controller
     super.dispose();
   }
 }
