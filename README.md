@@ -13,14 +13,10 @@
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This project is a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
-
-![alt text](https://github.com/smfgalal/ToDo-List-Flutter-App/blob/main/app_screenshot001.png?raw=true)
-![alt text](https://github.com/smfgalal/ToDo-List-Flutter-App/blob/main/app_screenshot002.png?raw=true)
+![alt text](https://github.com/smfgalal/ToDo-List-Flutter-App/blob/e8d18fc6ded69b5e6594199f6713795e22404b7d/screenshots/app_screenshot001.png)
+![alt text](https://github.com/smfgalal/ToDo-List-Flutter-App/blob/e8d18fc6ded69b5e6594199f6713795e22404b7d/screenshots/app_screenshot002.png)
 
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Buy me a coffee: [coff.ee/smfahmy](coff.ee/smfahmy)
