@@ -1,153 +1,3 @@
-// import 'dart:async';
-
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:flutter_timezone/flutter_timezone.dart';
-// import 'package:timezone/data/latest_all.dart' as tz;
-// import 'package:timezone/timezone.dart' as tz;
-
-// class NotificationService {
-//   final notificationPlugin = FlutterLocalNotificationsPlugin();
-//   static StreamController<NotificationResponse> streamController =
-//       StreamController.broadcast();
-
-//   static void onTap(NotificationResponse response) {
-//     streamController.add(response);
-//   }
-
-//   //========================================
-//   // Initializing Notifications
-//   //========================================
-//   Future<void> initNotification() async {
-//     tz.initializeTimeZones();
-//     final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
-//     tz.setLocalLocation(tz.getLocation(currentTimeZone));
-
-//     // Prepare Android init settings
-//     const initSettingsAndroid = AndroidInitializationSettings(
-//       '@mipmap/ic_launcher',
-//     );
-
-//     // Prepare iOS init settings
-//     const initSettingsIos = DarwinInitializationSettings(
-//       requestAlertPermission: true,
-//       requestBadgePermission: true,
-//       requestSoundPermission: true,
-//     );
-
-//     // Init Settings
-//     const initSettings = InitializationSettings(
-//       android: initSettingsAndroid,
-//       iOS: initSettingsIos,
-//     );
-
-//     // Initialize the plugin
-//     await notificationPlugin.initialize(
-//       initSettings,
-//       onDidReceiveNotificationResponse: onTap,
-//       onDidReceiveBackgroundNotificationResponse: onTap,
-//     );
-//   }
-
-//   //========================================
-//   // Notifications details Setup
-//   //========================================
-//   NotificationDetails notificationsDetails() {
-//     return const NotificationDetails(
-//       android: AndroidNotificationDetails(
-//         'tasks_channel_id',
-//         'Tasks Notification',
-//         channelDescription: 'Tasks notifications Channel',
-//         importance: Importance.max,
-//         priority: Priority.high,
-//       ),
-//       iOS: DarwinNotificationDetails(),
-//     );
-//   }
-
-//   //================================================
-//   // Show Repeated Daily and Weekly Notifications
-//   //================================================
-//   Future<void> showRepeatedDailyWeeklyNotifications({
-//     required int id,
-//     String? title,
-//     String? body,
-//     required bool isDaily,
-//   }) async {
-//     return notificationPlugin.periodicallyShow(
-//       id,
-//       title,
-//       body,
-//       isDaily ? RepeatInterval.daily : RepeatInterval.weekly,
-//       notificationsDetails(),
-//       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-//       payload: id.toString(),
-//     );
-//   }
-
-//   //====================================================
-//   // Show Repeated Monthly and Yearly Notifications
-//   //====================================================
-//   Future<void> showRepeatedMonthlyYearlyNotifications({
-//     required int id,
-//     String? title,
-//     String? body,
-//     required bool isMonthly,
-//   }) async {
-//     return notificationPlugin.periodicallyShowWithDuration(
-//       id,
-//       title,
-//       body,
-//       isMonthly ? const Duration(days: 30) : const Duration(days: 365),
-//       notificationsDetails(),
-//       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-//       payload: id.toString(),
-//     );
-//   }
-
-//   //========================================
-//   // Show Scheduled Notifications
-//   //========================================
-//   Future<void> showScheduledNotifications({
-//     required int id,
-//     String? title,
-//     String? body,
-//     required DateTime date,
-//   }) async {
-//     var scheduledDate = tz.TZDateTime(
-//       tz.local,
-//       date.year,
-//       date.month,
-//       date.day,
-//       date.hour,
-//       date.minute,
-//     );
-
-//     // Ensure the scheduled date is in the future
-//     if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
-//       scheduledDate = scheduledDate.add(const Duration(days: 1));
-//     }
-
-//     return notificationPlugin.zonedSchedule(
-//       id,
-//       title,
-//       body,
-//       scheduledDate,
-//       notificationsDetails(),
-//       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-//       matchDateTimeComponents: DateTimeComponents.time,
-//       payload: id.toString(), // Store note ID in payload
-//     );
-//   }
-
-//   Future<void> cancelAllNotifications() async {
-//     await notificationPlugin.cancelAll();
-//   }
-
-//   Future<void> cancelNotifications(int id) async {
-//     await notificationPlugin.cancel(id);
-//   }
-// }
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -245,7 +95,6 @@ class NotificationService {
       case 'Once a week':
         return currentDate.add(const Duration(days: 7));
       case 'Once a month':
-        // Handle edge cases (e.g., Jan 31 -> Feb 28/29)
         final nextMonth = currentDate.month == 12 ? 1 : currentDate.month + 1;
         final nextYear = currentDate.month == 12
             ? currentDate.year + 1
@@ -270,7 +119,7 @@ class NotificationService {
           currentDate.minute,
         );
       default:
-        return currentDate; // No repeat, return same date (won't be used)
+        return currentDate;
     }
   }
 
@@ -292,9 +141,9 @@ class NotificationService {
         date.day,
         date.hour,
         date.minute,
+        date.second,
       );
 
-      // Ensure the scheduled date is in the future
       if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
         scheduledDate = tz.TZDateTime(
           tz.local,
@@ -303,7 +152,15 @@ class NotificationService {
           date.day,
           date.hour,
           date.minute,
+          date.second,
         ).add(const Duration(days: 1));
+      }
+
+      final pending = await notificationPlugin.pendingNotificationRequests();
+      if (pending.length >= 60) {
+        debugPrint(
+          'Warning: Approaching iOS notification limit (${pending.length}/64)',
+        );
       }
 
       await notificationPlugin.zonedSchedule(
@@ -312,12 +169,9 @@ class NotificationService {
         body,
         scheduledDate,
         notificationsDetails(),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        matchDateTimeComponents: repeatInterval == 'No repeat'
-            ? DateTimeComponents.time
-            : null,
-        payload:
-            '$id|$repeatInterval', // Store ID and repeat interval in payload
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: null,
+        payload: '$id|$repeatInterval',
       );
     } catch (e, stack) {
       debugPrint('Error scheduling notification ID: $id: $e\n$stack');
@@ -336,7 +190,6 @@ class NotificationService {
         final repeatInterval = parts.length > 1 ? parts[1] : 'No repeat';
         if (noteId != null && repeatInterval != 'No repeat') {
           try {
-            // Fetch the note to verify it still exists and is not finished
             final note = await databaseProvider.getNoteById(noteId);
             if (note != null && !(note.isFinished ?? false)) {
               final currentDate = DateTime.now();
@@ -351,12 +204,20 @@ class NotificationService {
                 date: nextDate,
                 repeatInterval: repeatInterval,
               );
+            } else {
+              debugPrint(
+                'Note ID: $noteId not found or finished, no reschedule',
+              );
             }
           } catch (e, stack) {
             debugPrint(
               'Error rescheduling notification ID: $noteId: $e\n$stack',
             );
           }
+        } else {
+          debugPrint(
+            'No rescheduling for ID: $noteId, repeat: $repeatInterval',
+          );
         }
       }
     });

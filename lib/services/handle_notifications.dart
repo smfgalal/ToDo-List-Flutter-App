@@ -20,6 +20,7 @@ class HandleNotifications {
               note.toDate,
             );
             if (parsedToDate.isAfter(DateTime.now())) {
+              await NotificationService().cancelNotifications(note.id!);
               await NotificationService().showScheduledNotifications(
                 id: note.id!,
                 title: note.note,
@@ -40,7 +41,7 @@ class HandleNotifications {
     }
   }
 
-  void onTapNotification() async {
+  void onTapNotification() {
     NotificationService.streamController.stream.listen((response) async {
       if (response.payload != null) {
         _navigateToNote(response.payload!);
@@ -56,7 +57,6 @@ class HandleNotifications {
         final note = await databaseProvider.getNoteById(noteId);
         if (note != null && context.mounted) {
           Navigator.push(
-            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
               builder: (context) {

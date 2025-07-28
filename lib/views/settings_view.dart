@@ -124,41 +124,6 @@ class _SettingsViewState extends State<SettingsView> {
                     ShowWeekStartDialog().showWeekStartDialog(context);
                   },
                 ),
-                // const SizedBox(height: 16),
-                // const Text(
-                //   'Notifications',
-                //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                // ),
-                // const SizedBox(height: 16),
-                // SettingsListTileItem(
-                //   title: 'Sound',
-                //   subTitle: 'Default',
-                //   onTap: () {},
-                // ),
-                // SettingListTileWithSwitch(
-                //   isChecked: isVibrationChecked,
-                //   titleText: 'Vibration',
-                //   subTitleText: 'Enabled',
-                //   switchActiveColor: kPrimaryLightColor,
-                //   onChanged: (value) {
-                //     setState(() {
-                //       isVibrationChecked = value;
-                //     });
-                //   },
-                // ),
-                // const SizedBox(height: 8),
-                // SettingListTileWithSwitch(
-                //   isChecked: isVibrationChecked,
-                //   titleText: 'Notifications',
-                //   subTitleText: 'Enabled',
-                //   switchActiveColor: kPrimaryLightColor,
-                //   onChanged: (value) {
-                //     setState(() {
-                //       isVibrationChecked = value;
-                //     });
-                //   },
-                // ),
-                
               ],
             );
           },
