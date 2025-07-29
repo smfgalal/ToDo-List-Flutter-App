@@ -21,12 +21,10 @@ class CategoriesListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 100,
+    return AspectRatio(
+      aspectRatio: 4 / 1,
       child: Card(
-        color: ChangeTheme().theme(context)
-            ? kPrimaryDarkColor
-            : kPrimaryColor,
+        color: ChangeTheme().theme(context) ? kPrimaryDarkColor : kPrimaryColor,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(

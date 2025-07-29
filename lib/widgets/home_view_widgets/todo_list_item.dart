@@ -156,9 +156,9 @@ class _TodoListItemState extends State<TodoListItem> {
     );
   }
 
-  SizedBox item(BuildContext context) {
-    return SizedBox(
-      height: 130,
+  AspectRatio item(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 3 / 1,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         transform: Matrix4.translationValues(

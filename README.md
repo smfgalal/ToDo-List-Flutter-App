@@ -14,13 +14,8 @@
 
 ## Getting Started
 
-<<<<<<< HEAD
 This project is a Flutter application.
 [app_video.webm](https://github.com/user-attachments/assets/d5d0dd63-6b2e-41a9-af37-f3ebccdefd64)
-=======
-#### App demo video:
-![app_video](https://github.com/user-attachments/assets/9514fb48-70ab-4afd-845e-5136f9721a4e)
->>>>>>> d017e28d73a1fba1decd5e17f3d2af66ecff54f9
 
 ### Light Mode
 <img width="600" height="1300" alt="app_screenshoot001" src="https://github.com/user-attachments/assets/c0d18996-7aac-47e8-b050-24eb96ff4151" />
