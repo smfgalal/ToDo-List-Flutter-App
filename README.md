@@ -14,9 +14,10 @@
 ## Getting Started
 
 This project is a Flutter application.
+[app_video.webm](https://github.com/user-attachments/assets/d5d0dd63-6b2e-41a9-af37-f3ebccdefd64)
 
-![alt text](https://github.com/smfgalal/ToDo-List-Flutter-App/blob/e8d18fc6ded69b5e6594199f6713795e22404b7d/screenshots/app_screenshot001.png)
-![alt text](https://github.com/smfgalal/ToDo-List-Flutter-App/blob/e8d18fc6ded69b5e6594199f6713795e22404b7d/screenshots/app_screenshot002.png)
+### Light Mode
+<img width="600" height="1300" alt="app_screenshoot001" src="https://github.com/user-attachments/assets/c0d18996-7aac-47e8-b050-24eb96ff4151" />
 
 
-Buy me a coffee: [coff.ee/smfahmy](coff.ee/smfahmy)
+Buy me a coffee: [coff.ee/smfahmy](https://buymeacoffee.com/smfahmy)
